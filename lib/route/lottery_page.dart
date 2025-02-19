@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lottery/main.dart';
-import 'package:provider/provider.dart';
 
 class LotteryPage extends StatelessWidget {
   const LotteryPage({super.key});
@@ -13,22 +12,7 @@ class LotteryPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListTile(
-              leading: CircleAvatar(
-                radius: 30,
-                child: Text(
-                  '张',
-                  style: TextStyle(fontSize: 25),
-                ),
-                //backgroundImage: NetworkImage('assets/我的.png'),
-              ),
-              title: Text('张三'),
-              subtitle: Text('学号：12345676890'),
-              onTap: () {
-                Provider.of<MyProvider>(context, listen: false)
-                    .updateSelectedIndex(2);
-              },
-            ),
+            UserListTile(),
             Divider(color: Colors.grey),
             Spacer(flex: 2),
             Center(

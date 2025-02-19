@@ -20,21 +20,7 @@ class PalettePage extends StatelessWidget {
                   },
                   child: Icon(Icons.arrow_back_ios),
                 ),
-                Expanded(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      radius: 30,
-                      child: Text('张', style: TextStyle(fontSize: 25)),
-                    ),
-                    title: Text('张三'),
-                    subtitle: Text('学号：12345676890'),
-                    onTap: () {
-                      Provider.of<MyProvider>(context, listen: false)
-                          .updateSelectedIndex(2);
-                      Navigator.pop(context);
-                    },
-                  ),
-                )
+                Expanded(child: UserListTileD())
               ],
             ),
             Divider(color: Colors.grey),
@@ -43,7 +29,8 @@ class PalettePage extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: () {
                 debugPrint('主题设置-红色');
-                Provider.of<ThemeProvider>(context,listen: false).switchTheme(Colors.red);
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .switchTheme(Colors.red);
               },
               child: Card(
                 color: Colors.red,
@@ -72,7 +59,8 @@ class PalettePage extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: () {
                 debugPrint('主题设置-蓝色');
-                Provider.of<ThemeProvider>(context,listen: false).switchTheme(Colors.blue);
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .switchTheme(Colors.blue);
               },
               child: Card(
                 color: Colors.blue,
@@ -101,7 +89,8 @@ class PalettePage extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: () {
                 debugPrint('主题设置-粉色');
-                Provider.of<ThemeProvider>(context,listen: false).switchTheme(Colors.pink);
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .switchTheme(Colors.pink);
               },
               child: Card(
                 color: Colors.pink,
@@ -130,7 +119,8 @@ class PalettePage extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: () {
                 debugPrint('主题设置-紫色');
-                Provider.of<ThemeProvider>(context,listen: false).switchTheme(Colors.purple);
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .switchTheme(Colors.purple);
               },
               child: Card(
                 color: Colors.purple,

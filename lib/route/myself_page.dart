@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lottery/main.dart';
+import 'package:lottery/route/myself/information_page.dart';
 import 'package:lottery/route/myself/setting_page.dart';
+import 'package:provider/provider.dart';
 
 class MyselfPage extends StatelessWidget {
   const MyselfPage({super.key});
@@ -14,23 +17,28 @@ class MyselfPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-              Center(
-                child: Column(
+              Center(child: Consumer<UserProvider>(
+                  builder: (context, userProvider, child) {
+                return Column(
                   children: [
                     CircleAvatar(
                       radius: 44,
-                      child: Text('张', style: TextStyle(fontSize: 35)),
-                      //backgroundImage: NetworkImage('assets/我的.png'),
+                      child: (userProvider.user?.face.isEmpty ?? true)
+                          ? Text(userProvider.user?.nickname[0] ?? 'U',
+                              style: TextStyle(fontSize: 35))
+                          : Image.network(userProvider.user!.face),
                     ),
                     SizedBox(height: 5),
-                    Text('张三',
+                    Text(userProvider.user?.nickname ?? 'user',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
-                    Text('学号：1234567890', style: TextStyle(fontSize: 18)),
+                    Text(
+                        '学号：${(userProvider.user?.sid ?? '').isEmpty ? '1234567890' : userProvider.user!.sid}',
+                        style: TextStyle(fontSize: 18)),
                   ],
-                ),
-              ),
+                );
+              })),
               Divider(color: Colors.grey),
               SizedBox(height: 10),
               InkWell(
@@ -60,7 +68,11 @@ class MyselfPage extends StatelessWidget {
               InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
-                  debugPrint('个人信息设置');
+                  debugPrint('个人信息');
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => InformationPage()));
                 },
                 child: Card(
                   color: Theme.of(context).colorScheme.secondaryFixed,
@@ -73,7 +85,7 @@ class MyselfPage extends StatelessWidget {
                       children: [
                         Icon(Icons.person),
                         SizedBox(width: 5),
-                        Text('个人信息设置'),
+                        Text('个人信息'),
                         Expanded(child: SizedBox(height: 30)),
                         Icon(Icons.arrow_forward_ios)
                       ],
@@ -85,10 +97,8 @@ class MyselfPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
                   debugPrint('设置');
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SettingPage()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => SettingPage()));
                 },
                 child: Card(
                   color: Theme.of(context).colorScheme.secondaryFixed,

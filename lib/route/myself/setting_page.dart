@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottery/main.dart';
+import 'package:lottery/route/login_page.dart';
 import 'package:lottery/route/myself/palette_page.dart';
 import 'package:provider/provider.dart';
 
@@ -24,21 +25,7 @@ class SettingPage extends StatelessWidget {
                   },
                   child: Icon(Icons.arrow_back_ios),
                 ),
-                Expanded(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      radius: 30,
-                      child: Text('张', style: TextStyle(fontSize: 25)),
-                    ),
-                    title: Text('张三'),
-                    subtitle: Text('学号：12345676890'),
-                    onTap: () {
-                      Provider.of<MyProvider>(context, listen: false)
-                          .updateSelectedIndex(2);
-                      Navigator.pop(context);
-                    },
-                  ),
-                )
+                Expanded(child: UserListTileD())
               ],
             ),
             Divider(color: Colors.grey),
@@ -96,8 +83,10 @@ class SettingPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: () {
                 debugPrint('登出');
-                Provider.of<MyProvider>(context, listen: false)
+                Provider.of<IndexProvider>(context, listen: false)
                     .updateSelectedIndex(0);
+                Provider.of<UserProvider>(context, listen: false)
+                    .clearUser();
                 Navigator.pushAndRemoveUntil(
                   //跳转登录页并删除之前的路径
                   context,

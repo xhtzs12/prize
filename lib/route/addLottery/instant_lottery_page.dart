@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottery/main.dart';
-import 'package:provider/provider.dart';
 
 class InstantLotteryPage extends StatefulWidget {
   InstantLotteryPage({super.key});
@@ -120,21 +119,7 @@ class _InstantLotteryPageState extends State<InstantLotteryPage> {
                     },
                     child: Icon(Icons.arrow_back_ios),
                   ),
-                  Expanded(
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        radius: 30,
-                        child: Text('张', style: TextStyle(fontSize: 25)),
-                      ),
-                      title: Text('张三'),
-                      subtitle: Text('学号：12345676890'),
-                      onTap: () {
-                        Provider.of<MyProvider>(context, listen: false)
-                            .updateSelectedIndex(2);
-                        Navigator.pop(context);
-                      },
-                    ),
-                  )
+                  Expanded(child: UserListTileD())
                 ],
               ),
               Divider(color: Colors.grey),

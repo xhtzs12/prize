@@ -21,7 +21,7 @@ class HomePageState extends State<HomePage> {
 
   void _onItemTapped(int index) {
     debugPrint('BottombarIndex: $index');
-    Provider.of<MyProvider>(context, listen: false).updateSelectedIndex(index);
+    Provider.of<IndexProvider>(context, listen: false).updateSelectedIndex(index);
   }
 
   @override
@@ -29,8 +29,8 @@ class HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: GradientAppbar(),
       body:
-          _pages[Provider.of<MyProvider>(context, listen: true).selectedIndex],
-      bottomNavigationBar: Consumer<MyProvider>(
+          _pages[Provider.of<IndexProvider>(context, listen: true).selectedIndex],
+      bottomNavigationBar: Consumer<IndexProvider>(
         builder: (context, state, child) {
           return BottomNavigationBar(
             backgroundColor: Colors.grey[100],

@@ -1,17 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:lottery/route/home_page.dart';
+import 'package:lottery/Util/SPUtil.dart';
+import 'package:lottery/data/User.dart';
+import 'package:lottery/route/login_page.dart';
 import 'package:provider/provider.dart';
 
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => MyProvider(), //bottombar的选择监听
-      child: const MyApp(),
-    ),
-  );
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SPUtils.init();
+  runApp(const MyApp());
 }
 
-class MyProvider extends ChangeNotifier {
+class IndexProvider extends ChangeNotifier {
   int _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
 
@@ -23,12 +24,59 @@ class MyProvider extends ChangeNotifier {
 
 class ThemeProvider extends ChangeNotifier {
   Color _seedColor = Colors.red;
-
   Color get seedColor => _seedColor;
 
   void switchTheme(Color themeColor) {
     _seedColor = themeColor;
+    saveTheme();
     notifyListeners(); // 通知监听者更新
+  }
+
+  // 加载主题设置
+  Future<void> loadTheme() async {
+    int? colorValue = SPUtils.getInt('seedColor');
+    if (colorValue != null) {
+      _seedColor = Color(colorValue);
+    }
+  }
+
+  // 保存主题设置
+  Future<void> saveTheme() async {
+    await SPUtils.setInt('seedColor', _seedColor.value);
+  }
+}
+
+class UserProvider with ChangeNotifier {
+  User _user = User();
+
+  User? get user => _user;
+
+  // 保存用户数据到 SharedPreferences
+  Future<void> saveUser(User user) async {
+    try {
+      await SPUtils.setString('user', jsonEncode(user.toJson()));
+      _user = user;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Failed to save user: $e');
+    }
+  }
+
+  // 从 SharedPreferences 加载用户数据
+  Future<void> loadUser() async {
+    final String? userJson = await SPUtils.getString('user');
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      _user = User.fromJson(userMap);
+      notifyListeners();
+    }
+  }
+
+  // 清除用户数据
+  Future<void> clearUser() async {
+    await SPUtils.remove('user');
+    _user = User();
+    notifyListeners();
   }
 }
 
@@ -39,8 +87,23 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => MyProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => IndexProvider()),
+        FutureProvider<ThemeProvider>(
+          create: (_) async {
+            final themeProvider = ThemeProvider();
+            await themeProvider.loadTheme(); // 确保加载完成
+            return themeProvider; // 返回加载后的实例
+          },
+          initialData: ThemeProvider(), // 提供初始值
+        ),
+        FutureProvider<UserProvider>(
+          create: (_) async {
+            final userProvider = UserProvider();
+            await userProvider.loadUser(); // 确保加载完成
+            return userProvider; // 返回加载后的实例
+          },
+          initialData: UserProvider(), // 提供初始值
+        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -61,134 +124,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  bool _isAgree = false;
-  TextEditingController _unameController = TextEditingController();
-  TextEditingController _pwdController = TextEditingController();
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: GradientAppbar(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Spacer(flex: 1),
-            Card(
-              color: Colors.white,
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8, // 设置宽度
-                height: MediaQuery.of(context).size.height * 0.1, // 设置高度
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center, // 垂直居中
-                  children: [
-                    Text(
-                      '今天你抽卡了吗',
-                      style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color:
-                              Theme.of(context).colorScheme.secondaryFixedDim),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Spacer(flex: 1),
-            TextField(
-              decoration: InputDecoration(
-                labelText: '请输入账号',
-                border: OutlineInputBorder(),
-              ),
-              controller: _unameController,
-            ),
-            const SizedBox(height: 16.0),
-            TextField(
-              decoration: InputDecoration(
-                labelText: '请输入密码',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-              controller: _pwdController,
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                // 登录按钮的处理逻辑
-                if (_isAgree) {
-                  if (_unameController.text == '' ||
-                      _pwdController.text == '') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('请输入用户名和密码'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  } else {
-                    debugPrint(_unameController.text);
-                    debugPrint(_pwdController.text);
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomePage()));
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('请同意下方协议'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
-                }
-              },
-              child: const Text('登录'),
-            ),
-            const SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Checkbox(
-                  value: _isAgree,
-                  shape: CircleBorder(),
-                  onChanged: (value) {
-                    setState(() {
-                      _isAgree = value!;
-                    });
-                  },
-                ),
-                const Expanded(
-                  child: Text(
-                    '我已阅读并同意《隐私政策》及《账号声明》',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-            Spacer(flex: 3),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class GradientAppbar extends StatelessWidget implements PreferredSizeWidget {
   GradientAppbar({super.key});
 
   @override
   Size get preferredSize {
-    final height = WidgetsBinding.instance.window.physicalSize.height;
-    return Size.fromHeight(height * 0.05);
+    final height = WidgetsBinding
+        .instance.platformDispatcher.views.first.physicalSize.height;
+    return Size.fromHeight(height * 0.03);
   }
 
   @override
@@ -212,5 +155,58 @@ class GradientAppbar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
     );
+  }
+}
+
+class UserListTile extends StatelessWidget {
+  const UserListTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<UserProvider>(builder: (context, userProvider, child) {
+      return ListTile(
+        leading: CircleAvatar(
+          radius: 30,
+          child: (userProvider.user?.face.isEmpty ?? true)
+              ? Text(userProvider.user?.nickname[0] ?? 'U',
+                  style: TextStyle(fontSize: 25))
+              : Image.network(userProvider.user!.face),
+        ),
+        title: Text(userProvider.user?.nickname ?? 'user'),
+        subtitle: Text(
+            '学号：${(userProvider.user?.sid ?? '').isEmpty ? '1234567890' : userProvider.user!.sid}'),
+        onTap: () {
+          Provider.of<IndexProvider>(context, listen: false)
+              .updateSelectedIndex(2);
+        },
+      );
+    });
+  }
+}
+
+class UserListTileD extends StatelessWidget {
+  const UserListTileD({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<UserProvider>(builder: (context, userProvider, child) {
+      return ListTile(
+        leading: CircleAvatar(
+          radius: 30,
+          child: (userProvider.user?.face.isEmpty ?? true)
+              ? Text(userProvider.user?.nickname[0] ?? 'U',
+                  style: TextStyle(fontSize: 25))
+              : Image.network(userProvider.user!.face),
+        ),
+        title: Text(userProvider.user?.nickname ?? 'user'),
+        subtitle: Text(
+            '学号：${(userProvider.user?.sid ?? '').isEmpty ? '1234567890' : userProvider.user!.sid}'),
+        onTap: () {
+          Provider.of<IndexProvider>(context, listen: false)
+              .updateSelectedIndex(2);
+          Navigator.pop(context);
+        },
+      );
+    });
   }
 }

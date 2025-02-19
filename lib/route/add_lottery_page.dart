@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottery/main.dart';
 import 'package:lottery/route/addLottery/instant_lottery_page.dart';
-import 'package:provider/provider.dart';
 
 class AddLotteryPage extends StatelessWidget {
   const AddLotteryPage({super.key});
@@ -19,18 +18,7 @@ class AddLotteryPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ListTile(
-                leading: CircleAvatar(
-                  radius: 30,
-                  child: Text('张', style: TextStyle(fontSize: 25)),
-                ),
-                title: Text('张三'),
-                subtitle: Text('学号：12345676890'),
-                onTap: () {
-                  Provider.of<MyProvider>(context, listen: false)
-                      .updateSelectedIndex(2);
-                },
-              ),
+              UserListTile(),
               Divider(color: Colors.grey),
               SizedBox(height: 20),
               Center(
