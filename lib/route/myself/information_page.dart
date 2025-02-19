@@ -41,7 +41,7 @@ class _InformationPageState extends State<InformationPage> {
                         child: CircleAvatar(
                           radius: 40,
                           child: (userProvider.user?.face.isEmpty ?? true)
-                              ? Text(userProvider.user?.nickname[0] ?? 'U',
+                              ? Text(userProvider.user!.nickname[0],
                                   style: TextStyle(fontSize: 30))
                               : Image.network(userProvider.user!.face),
                         ),
@@ -66,23 +66,11 @@ class _InformationPageState extends State<InformationPage> {
                                   fontSize: 24, fontWeight: FontWeight.bold)),
                         ),
                         Divider(color: Colors.grey, height: 1),
-                        _buildUnchangingItem(
-                            '学号',
-                            (userProvider.user?.sid ?? '').isEmpty
-                                ? '1234567890'
-                                : userProvider.user!.sid),
+                        _buildUnchangingItem('学号', userProvider.user!.sid),
                         Divider(color: Colors.grey, height: 1),
-                        _buildUnchangingItem(
-                            '姓名',
-                            (userProvider.user?.name ?? '').isEmpty
-                                ? '张三'
-                                : userProvider.user!.name),
+                        _buildUnchangingItem('姓名', userProvider.user!.name),
                         Divider(color: Colors.grey, height: 1),
-                        _buildChangingItem(
-                            '昵称',
-                            (userProvider.user?.nickname ?? '').isEmpty
-                                ? 'user'
-                                : userProvider.user!.nickname,
+                        _buildChangingItem('昵称', userProvider.user!.nickname,
                             _nicknameController),
                       ],
                     ),

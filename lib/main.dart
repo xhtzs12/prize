@@ -168,13 +168,12 @@ class UserListTile extends StatelessWidget {
         leading: CircleAvatar(
           radius: 30,
           child: (userProvider.user?.face.isEmpty ?? true)
-              ? Text(userProvider.user?.nickname[0] ?? 'U',
+              ? Text(userProvider.user!.nickname[0],
                   style: TextStyle(fontSize: 25))
               : Image.network(userProvider.user!.face),
         ),
-        title: Text(userProvider.user?.nickname ?? 'user'),
-        subtitle: Text(
-            '学号：${(userProvider.user?.sid ?? '').isEmpty ? '1234567890' : userProvider.user!.sid}'),
+        title: Text(userProvider.user!.nickname),
+        subtitle: Text('学号：${userProvider.user!.sid}'),
         onTap: () {
           Provider.of<IndexProvider>(context, listen: false)
               .updateSelectedIndex(2);
@@ -194,13 +193,12 @@ class UserListTileD extends StatelessWidget {
         leading: CircleAvatar(
           radius: 30,
           child: (userProvider.user?.face.isEmpty ?? true)
-              ? Text(userProvider.user?.nickname[0] ?? 'U',
+              ? Text(userProvider.user!.nickname[0],
                   style: TextStyle(fontSize: 25))
               : Image.network(userProvider.user!.face),
         ),
-        title: Text(userProvider.user?.nickname ?? 'user'),
-        subtitle: Text(
-            '学号：${(userProvider.user?.sid ?? '').isEmpty ? '1234567890' : userProvider.user!.sid}'),
+        title: Text(userProvider.user!.nickname),
+        subtitle: Text('学号：${userProvider.user!.sid}'),
         onTap: () {
           Provider.of<IndexProvider>(context, listen: false)
               .updateSelectedIndex(2);

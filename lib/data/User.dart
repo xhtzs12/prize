@@ -10,12 +10,12 @@ class User {
   // 带默认值的构造函数
   User({
     this.uid = 0,
-    this.sid = '',
-    this.name = '',
-    this.nickname = '',
+    this.sid = '222200200222',
+    this.name = '张三',
+    this.nickname = '张三',
     this.face = '',
-    this.password = '',
-    this.unionid = '',
+    this.password = '111',
+    this.unionid = 'ZS1234567890',
   });
 
   // 从 Map 中解析 User 对象
