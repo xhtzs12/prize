@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottery/main.dart';
+import 'package:lottery/route/addLottery/common_lottery.dart';
 import 'package:lottery/route/addLottery/instant_lottery_page.dart';
 
 class AddLotteryPage extends StatelessWidget {
@@ -9,7 +10,7 @@ class AddLotteryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final secondaryFixed = Theme.of(context).colorScheme.secondaryFixed;
+    final secondaryFixed = Theme.of(context).cardColor;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -23,6 +24,7 @@ class AddLotteryPage extends StatelessWidget {
               SizedBox(height: 20),
               Center(
                 child: Card(
+                  color: Colors.grey[100],
                   elevation: 8,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -30,52 +32,64 @@ class AddLotteryPage extends StatelessWidget {
                   child: SizedBox(
                     width: screenWidth * 0.8,
                     height: screenHeight * 0.25,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        children: [
-                          Text('创建抽奖', style: TextStyle(fontSize: 22)),
-                          Divider(color: Colors.grey),
-                          Spacer(),
-                          InkWell(
-                            onTap: () {
-                              debugPrint('通用抽奖');
-                            },
-                            child: Container(
-                              width: screenWidth * 0.6,
-                              decoration: BoxDecoration(
-                                  color: secondaryFixed,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Center(
-                                child: Text('通用抽奖',
-                                    style: TextStyle(fontSize: 28)),
-                              ),
+                    child: Column(
+                      children: [
+                        Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                color:
+                                    Theme.of(context).colorScheme.primaryFixed,
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(16),
+                                    topRight: Radius.circular(16))),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                                child: Text('创建抽奖',
+                                    style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold)))),
+                        Divider(color: Colors.grey),
+                        Spacer(),
+                        InkWell(
+                          onTap: () {
+                            debugPrint('通用抽奖');
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CommonLottery()));
+                          },
+                          child: Container(
+                            width: screenWidth * 0.6,
+                            decoration: BoxDecoration(
+                                color: secondaryFixed,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Center(
+                              child:
+                                  Text('通用抽奖', style: TextStyle(fontSize: 28)),
                             ),
                           ),
-                          Spacer(),
-                          InkWell(
-                            onTap: () {
-                              debugPrint('即抽即开');
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          InstantLotteryPage()));
-                            },
-                            child: Container(
-                              width: screenWidth * 0.6,
-                              decoration: BoxDecoration(
-                                  color: secondaryFixed,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Center(
-                                child: Text('即抽即开',
-                                    style: TextStyle(fontSize: 28)),
-                              ),
+                        ),
+                        Spacer(),
+                        InkWell(
+                          onTap: () {
+                            debugPrint('即抽即开');
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        InstantLotteryPage()));
+                          },
+                          child: Container(
+                            width: screenWidth * 0.6,
+                            decoration: BoxDecoration(
+                                color: secondaryFixed,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Center(
+                              child:
+                                  Text('即抽即开', style: TextStyle(fontSize: 28)),
                             ),
                           ),
-                          Spacer()
-                        ],
-                      ),
+                        ),
+                        Spacer()
+                      ],
                     ),
                   ),
                 ),
@@ -83,6 +97,7 @@ class AddLotteryPage extends StatelessWidget {
               SizedBox(height: 20),
               Center(
                 child: Card(
+                  color: Colors.grey[100],
                   elevation: 8,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),

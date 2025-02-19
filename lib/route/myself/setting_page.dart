@@ -16,19 +16,9 @@ class SettingPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Icon(Icons.arrow_back_ios),
-                ),
-                Expanded(child: UserListTileD())
-              ],
-            ),
+            UserListTileD(),
             Divider(color: Colors.grey),
+            SizedBox(height: 20),
             InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: () {

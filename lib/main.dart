@@ -180,8 +180,7 @@ class UserListTile extends StatelessWidget {
                 ? Text(user!.nickname[0], style: TextStyle(fontSize: 25))
                 : ClipOval(
                     child: FadeInImage(
-                      placeholder:
-                          AssetImage('assets/loading.gif'), // 占位图
+                      placeholder: AssetImage('assets/loading.gif'), // 占位图
                       image: NetworkImage(user!.face),
                       fit: BoxFit.cover,
                       width: 60,
@@ -206,34 +205,47 @@ class UserListTileD extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<UserProvider, User?>(
-      selector: (_, userProvider) => userProvider.user,
-      builder: (context, user, child) {
-        return ListTile(
-          leading: CircleAvatar(
-            radius: 30,
-            child: (user?.face.isEmpty ?? true)
-                ? Text(user!.nickname[0], style: TextStyle(fontSize: 25))
-                : ClipOval(
-                    child: FadeInImage(
-                      placeholder:
-                          AssetImage('assets/loading.gif'), // 占位图
-                      image: NetworkImage(user!.face),
-                      fit: BoxFit.cover, // 确保图像填充整个圆形区域
-                      width: 60, // 设置图像的宽度为两倍半径
-                      height: 60, // 设置图像的高度为两倍半径
-                    ),
-                  ),
-          ),
-          title: Text(user.nickname),
-          subtitle: Text('学号：${user.sid}'),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        InkWell(
           onTap: () {
-            Provider.of<IndexProvider>(context, listen: false)
-                .updateSelectedIndex(2);
             Navigator.pop(context);
           },
-        );
-      },
+          child: Icon(Icons.arrow_back_ios),
+        ),
+        Expanded(
+          child: Selector<UserProvider, User?>(
+            selector: (_, userProvider) => userProvider.user,
+            builder: (context, user, child) {
+              return ListTile(
+                leading: CircleAvatar(
+                  radius: 30,
+                  child: (user?.face.isEmpty ?? true)
+                      ? Text(user!.nickname[0], style: TextStyle(fontSize: 25))
+                      : ClipOval(
+                          child: FadeInImage(
+                            placeholder:
+                                AssetImage('assets/loading.gif'), // 占位图
+                            image: NetworkImage(user!.face),
+                            fit: BoxFit.cover, // 确保图像填充整个圆形区域
+                            width: 60, // 设置图像的宽度为两倍半径
+                            height: 60, // 设置图像的高度为两倍半径
+                          ),
+                        ),
+                ),
+                title: Text(user.nickname),
+                subtitle: Text('学号：${user.sid}'),
+                onTap: () {
+                  Provider.of<IndexProvider>(context, listen: false)
+                      .updateSelectedIndex(2);
+                  Navigator.pop(context);
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

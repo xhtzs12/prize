@@ -110,18 +110,7 @@ class _InstantLotteryPageState extends State<InstantLotteryPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Icon(Icons.arrow_back_ios),
-                  ),
-                  Expanded(child: UserListTileD())
-                ],
-              ),
+              UserListTileD(),
               Divider(color: Colors.grey),
               SizedBox(height: 10),
               Card(
@@ -144,12 +133,21 @@ class _InstantLotteryPageState extends State<InstantLotteryPage> {
                     borderRadius: BorderRadius.circular(16)),
                 child: Column(
                   children: [
-                    Padding(
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryFixed,
+                        borderRadius: BorderRadius.only(topLeft: Radius.circular(16),topRight: Radius.circular(16))
+                      ),
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        '抽奖设置',
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
+                      child: Center(
+                        child: Text(
+                          '抽奖设置',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                     Divider(color: Colors.grey),
