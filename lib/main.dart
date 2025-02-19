@@ -125,10 +125,6 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
     debugPrint("清除用户信息");
   }
-
-  void refresh(){
-    notifyListeners();
-  }
 }
 
 class GradientAppbar extends StatelessWidget implements PreferredSizeWidget {
@@ -178,7 +174,16 @@ class UserListTile extends StatelessWidget {
             radius: 30,
             child: (user?.face.isEmpty ?? true)
                 ? Text(user!.nickname[0], style: TextStyle(fontSize: 25))
-                : Image.network(user!.face),
+                : ClipOval(
+                    child: FadeInImage(
+                      placeholder:
+                          AssetImage('assets/loading.gif'), // 占位图
+                      image: NetworkImage(user!.face),
+                      fit: BoxFit.cover,
+                      width: 60,
+                      height: 60,
+                    ),
+                  ),
           ),
           title: Text(user.nickname),
           subtitle: Text('学号：${user.sid}'),
@@ -205,14 +210,23 @@ class UserListTileD extends StatelessWidget {
             radius: 30,
             child: (user?.face.isEmpty ?? true)
                 ? Text(user!.nickname[0], style: TextStyle(fontSize: 25))
-                : Image.network(user!.face),
+                : ClipOval(
+                    child: FadeInImage(
+                      placeholder:
+                          AssetImage('assets/loading.gif'), // 占位图
+                      image: NetworkImage(user!.face),
+                      fit: BoxFit.cover, // 确保图像填充整个圆形区域
+                      width: 60, // 设置图像的宽度为两倍半径
+                      height: 60, // 设置图像的高度为两倍半径
+                    ),
+                  ),
           ),
           title: Text(user.nickname),
           subtitle: Text('学号：${user.sid}'),
           onTap: () {
             Provider.of<IndexProvider>(context, listen: false)
                 .updateSelectedIndex(2);
-                Navigator.pop(context);
+            Navigator.pop(context);
           },
         );
       },

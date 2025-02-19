@@ -30,7 +30,8 @@ class _InformationPageState extends State<InformationPage> {
                       InkWell(
                         onTap: () {
                           debugPrint('个人信息页面返回');
-                          Provider.of<IndexProvider>(context,listen: false).updateSelectedIndex(0);
+                          Provider.of<IndexProvider>(context, listen: false)
+                              .updateSelectedIndex(0);
                           Navigator.pop(context);
                         },
                         child: Icon(Icons.arrow_back_ios),
@@ -46,8 +47,17 @@ class _InformationPageState extends State<InformationPage> {
                           child: (userProvider.user!.face.isEmpty)
                               ? Text(userProvider.user!.nickname[0],
                                   style: TextStyle(fontSize: 30))
-                              : Image.network(userProvider.user!.face,
-                                  fit: BoxFit.cover),
+                              : ClipOval(
+                                  child: FadeInImage(
+                                    placeholder:
+                                        AssetImage('assets/loading.gif'), // 占位图
+                                    image:
+                                        NetworkImage(userProvider.user!.face),
+                                    fit: BoxFit.cover, // 确保图像填充整个圆形区域
+                                    width: 80, // 设置图像的宽度为两倍半径
+                                    height: 80, // 设置图像的高度为两倍半径
+                                  ),
+                                ),
                         ),
                       ),
                       Spacer(flex: 9),

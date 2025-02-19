@@ -27,7 +27,17 @@ class MyselfPage extends StatelessWidget {
                           child: (userProvider.user?.face.isEmpty ?? true)
                               ? Text(userProvider.user!.nickname[0],
                                   style: TextStyle(fontSize: 35))
-                              : Image.network(userProvider.user!.face),
+                              : ClipOval(
+                                  child: FadeInImage(
+                                    placeholder:
+                                        AssetImage('assets/loading.gif'), // 占位图
+                                    image:
+                                        NetworkImage(userProvider.user!.face),
+                                    fit: BoxFit.cover, // 确保图像填充整个圆形区域
+                                    width: 88, // 设置图像的宽度为两倍半径
+                                    height: 88, // 设置图像的高度为两倍半径
+                                  ),
+                                ),
                         ),
                         SizedBox(height: 5),
                         Text(userProvider.user!.nickname,

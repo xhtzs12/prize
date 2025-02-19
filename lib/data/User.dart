@@ -13,7 +13,7 @@ class User {
     this.sid = '222200200222',
     this.name = '张三',
     this.nickname = '张三',
-    this.face = '',
+    this.face = 'https://picurl.billadom.top/2025/02/19/67b59900ae4eb.jpg',
     this.password = '111',
     this.unionid = 'ZS1234567890',
   });
