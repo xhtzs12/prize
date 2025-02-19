@@ -17,28 +17,30 @@ class MyselfPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-              Center(child: Consumer<UserProvider>(
+              Center(
+                child: Consumer<UserProvider>(
                   builder: (context, userProvider, child) {
-                return Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 44,
-                      child: (userProvider.user?.face.isEmpty ?? true)
-                          ? Text(userProvider.user?.nickname[0] ?? 'U',
-                              style: TextStyle(fontSize: 35))
-                          : Image.network(userProvider.user!.face),
-                    ),
-                    SizedBox(height: 5),
-                    Text(userProvider.user?.nickname ?? 'user',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 5),
-                    Text(
-                        '学号：${(userProvider.user?.sid ?? '').isEmpty ? '1234567890' : userProvider.user!.sid}',
-                        style: TextStyle(fontSize: 18)),
-                  ],
-                );
-              })),
+                    return Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 44,
+                          child: (userProvider.user?.face.isEmpty ?? true)
+                              ? Text(userProvider.user!.nickname[0],
+                                  style: TextStyle(fontSize: 35))
+                              : Image.network(userProvider.user!.face),
+                        ),
+                        SizedBox(height: 5),
+                        Text(userProvider.user!.nickname,
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 5),
+                        Text('学号：${userProvider.user!.sid}',
+                            style: TextStyle(fontSize: 18)),
+                      ],
+                    );
+                  },
+                ),
+              ),
               Divider(color: Colors.grey),
               SizedBox(height: 10),
               InkWell(

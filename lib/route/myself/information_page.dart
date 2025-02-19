@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottery/data/User.dart';
 import 'package:lottery/main.dart';
 import 'package:provider/provider.dart';
 
@@ -18,9 +19,9 @@ class _InformationPageState extends State<InformationPage> {
       appBar: GradientAppbar(),
       body: SingleChildScrollView(
         child: Padding(
-            padding: const EdgeInsets.all(16),
-            child:
-                Consumer<UserProvider>(builder: (context, userProvider, child) {
+          padding: const EdgeInsets.all(16),
+          child: Consumer<UserProvider>(
+            builder: (context, userProvider, child) {
               return Column(
                 children: [
                   Row(
@@ -28,11 +29,13 @@ class _InformationPageState extends State<InformationPage> {
                     children: [
                       InkWell(
                         onTap: () {
+                          debugPrint('个人信息页面返回');
+                          Provider.of<IndexProvider>(context,listen: false).updateSelectedIndex(0);
                           Navigator.pop(context);
                         },
                         child: Icon(Icons.arrow_back_ios),
                       ),
-                      Spacer(flex: 4),
+                      Spacer(flex: 8),
                       InkWell(
                         borderRadius: BorderRadius.circular(20),
                         onTap: () {
@@ -40,13 +43,14 @@ class _InformationPageState extends State<InformationPage> {
                         },
                         child: CircleAvatar(
                           radius: 40,
-                          child: (userProvider.user?.face.isEmpty ?? true)
+                          child: (userProvider.user!.face.isEmpty)
                               ? Text(userProvider.user!.nickname[0],
                                   style: TextStyle(fontSize: 30))
-                              : Image.network(userProvider.user!.face),
+                              : Image.network(userProvider.user!.face,
+                                  fit: BoxFit.cover),
                         ),
                       ),
-                      Spacer(flex: 5),
+                      Spacer(flex: 9),
                     ],
                   ),
                   SizedBox(height: 10),
@@ -77,7 +81,9 @@ class _InformationPageState extends State<InformationPage> {
                   ),
                 ],
               );
-            })),
+            },
+          ),
+        ),
       ),
     );
   }
@@ -125,11 +131,11 @@ class _InformationPageState extends State<InformationPage> {
                     debugPrint('确定修改$label:$controller.text');
                     final userProvider =
                         Provider.of<UserProvider>(context, listen: false);
-                    if (userProvider.user != null) {
-                      userProvider.user!.nickname = controller.text;
-                      userProvider.saveUser(userProvider.user!);
-                    }
+                    User user = userProvider.user!;
+                    user.nickname = controller.text;
+                    userProvider.saveUser(user);
                     controller.clear();
+                    setState(() {});
                     Navigator.pop(context);
                   },
                   child: Text('确定'),

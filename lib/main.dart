@@ -12,6 +12,50 @@ void main() async {
   runApp(const MyApp());
 }
 
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => IndexProvider()),
+        FutureProvider<ThemeProvider>(
+          create: (_) async {
+            final themeProvider = ThemeProvider();
+            await themeProvider.loadTheme(); // 确保加载完成
+            return themeProvider; // 返回加载后的实例
+          },
+          initialData: ThemeProvider(), // 提供初始值
+        ),
+        FutureProvider<UserProvider>(
+          create: (_) async {
+            final userProvider = UserProvider();
+            await userProvider.loadUser(); // 确保加载完成
+            return userProvider; // 返回加载后的实例
+          },
+          initialData: UserProvider(), // 提供初始值
+        ),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            theme: ThemeData(
+              scaffoldBackgroundColor: Colors.white, // 设置全局背景色为纯白色
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: themeProvider.seedColor,
+                dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+              ),
+            ),
+            debugShowCheckedModeBanner: false,
+            home: LoginPage(),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class IndexProvider extends ChangeNotifier {
   int _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
@@ -57,6 +101,7 @@ class UserProvider with ChangeNotifier {
       await SPUtils.setString('user', jsonEncode(user.toJson()));
       _user = user;
       notifyListeners();
+      debugPrint("保存用户信息");
     } catch (e) {
       debugPrint('Failed to save user: $e');
     }
@@ -69,6 +114,7 @@ class UserProvider with ChangeNotifier {
       final Map<String, dynamic> userMap = jsonDecode(userJson);
       _user = User.fromJson(userMap);
       notifyListeners();
+      debugPrint("加载用户信息");
     }
   }
 
@@ -77,50 +123,11 @@ class UserProvider with ChangeNotifier {
     await SPUtils.remove('user');
     _user = User();
     notifyListeners();
+    debugPrint("清除用户信息");
   }
-}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => IndexProvider()),
-        FutureProvider<ThemeProvider>(
-          create: (_) async {
-            final themeProvider = ThemeProvider();
-            await themeProvider.loadTheme(); // 确保加载完成
-            return themeProvider; // 返回加载后的实例
-          },
-          initialData: ThemeProvider(), // 提供初始值
-        ),
-        FutureProvider<UserProvider>(
-          create: (_) async {
-            final userProvider = UserProvider();
-            await userProvider.loadUser(); // 确保加载完成
-            return userProvider; // 返回加载后的实例
-          },
-          initialData: UserProvider(), // 提供初始值
-        ),
-      ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
-          return MaterialApp(
-            theme: ThemeData(
-              scaffoldBackgroundColor: Colors.white, // 设置全局背景色为纯白色
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: themeProvider.seedColor,
-                dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
-              ),
-            ),
-            debugShowCheckedModeBanner: false,
-            home: LoginPage(),
-          );
-        },
-      ),
-    );
+  void refresh(){
+    notifyListeners();
   }
 }
 
@@ -163,23 +170,25 @@ class UserListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(builder: (context, userProvider, child) {
-      return ListTile(
-        leading: CircleAvatar(
-          radius: 30,
-          child: (userProvider.user?.face.isEmpty ?? true)
-              ? Text(userProvider.user!.nickname[0],
-                  style: TextStyle(fontSize: 25))
-              : Image.network(userProvider.user!.face),
-        ),
-        title: Text(userProvider.user!.nickname),
-        subtitle: Text('学号：${userProvider.user!.sid}'),
-        onTap: () {
-          Provider.of<IndexProvider>(context, listen: false)
-              .updateSelectedIndex(2);
-        },
-      );
-    });
+    return Selector<UserProvider, User?>(
+      selector: (_, userProvider) => userProvider.user,
+      builder: (context, user, child) {
+        return ListTile(
+          leading: CircleAvatar(
+            radius: 30,
+            child: (user?.face.isEmpty ?? true)
+                ? Text(user!.nickname[0], style: TextStyle(fontSize: 25))
+                : Image.network(user!.face),
+          ),
+          title: Text(user.nickname),
+          subtitle: Text('学号：${user.sid}'),
+          onTap: () {
+            Provider.of<IndexProvider>(context, listen: false)
+                .updateSelectedIndex(2);
+          },
+        );
+      },
+    );
   }
 }
 
@@ -188,23 +197,25 @@ class UserListTileD extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(builder: (context, userProvider, child) {
-      return ListTile(
-        leading: CircleAvatar(
-          radius: 30,
-          child: (userProvider.user?.face.isEmpty ?? true)
-              ? Text(userProvider.user!.nickname[0],
-                  style: TextStyle(fontSize: 25))
-              : Image.network(userProvider.user!.face),
-        ),
-        title: Text(userProvider.user!.nickname),
-        subtitle: Text('学号：${userProvider.user!.sid}'),
-        onTap: () {
-          Provider.of<IndexProvider>(context, listen: false)
-              .updateSelectedIndex(2);
-          Navigator.pop(context);
-        },
-      );
-    });
+    return Selector<UserProvider, User?>(
+      selector: (_, userProvider) => userProvider.user,
+      builder: (context, user, child) {
+        return ListTile(
+          leading: CircleAvatar(
+            radius: 30,
+            child: (user?.face.isEmpty ?? true)
+                ? Text(user!.nickname[0], style: TextStyle(fontSize: 25))
+                : Image.network(user!.face),
+          ),
+          title: Text(user.nickname),
+          subtitle: Text('学号：${user.sid}'),
+          onTap: () {
+            Provider.of<IndexProvider>(context, listen: false)
+                .updateSelectedIndex(2);
+                Navigator.pop(context);
+          },
+        );
+      },
+    );
   }
 }
