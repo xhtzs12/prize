@@ -3,6 +3,8 @@ import 'package:lottery/main.dart';
 import 'package:provider/provider.dart';
 
 class PalettePage extends StatelessWidget {
+  const PalettePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -20,22 +20,26 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => IndexProvider()),
-        FutureProvider<ThemeProvider>(
-          create: (_) async {
-            final themeProvider = ThemeProvider();
-            await themeProvider.loadTheme(); // 确保加载完成
-            return themeProvider; // 返回加载后的实例
-          },
-          initialData: ThemeProvider(), // 提供初始值
-        ),
-        FutureProvider<UserProvider>(
-          create: (_) async {
-            final userProvider = UserProvider();
-            await userProvider.loadUser(); // 确保加载完成
-            return userProvider; // 返回加载后的实例
-          },
-          initialData: UserProvider(), // 提供初始值
-        ),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()..loadTheme()),
+        ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
+        // 纯纯依托答辩，用了这俩Provider就跟废了样，更新不及时，这就是Future、async、和await啊。
+        // 批斗时讲讲，哥。
+        // FutureProvider<ThemeProvider>(
+        //   create: (_) async {
+        //     final themeProvider = ThemeProvider();
+        //     await themeProvider.loadTheme(); // 确保加载完成
+        //     return themeProvider; // 返回加载后的实例
+        //   },
+        //   initialData: ThemeProvider(), // 提供初始值
+        // ),
+        // FutureProvider<UserProvider>(
+        //   create: (_) async {
+        //     final userProvider = UserProvider();
+        //     await userProvider.loadUser(); // 确保加载完成
+        //     return userProvider; // 返回加载后的实例
+        //   },
+        //   initialData: UserProvider(), // 提供初始值
+        // ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

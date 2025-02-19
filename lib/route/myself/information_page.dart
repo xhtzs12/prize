@@ -30,8 +30,6 @@ class _InformationPageState extends State<InformationPage> {
                       InkWell(
                         onTap: () {
                           debugPrint('个人信息页面返回');
-                          Provider.of<IndexProvider>(context, listen: false)
-                              .updateSelectedIndex(0);
                           Navigator.pop(context);
                         },
                         child: Icon(Icons.arrow_back_ios),
@@ -145,7 +143,6 @@ class _InformationPageState extends State<InformationPage> {
                     user.nickname = controller.text;
                     userProvider.saveUser(user);
                     controller.clear();
-                    setState(() {});
                     Navigator.pop(context);
                   },
                   child: Text('确定'),
