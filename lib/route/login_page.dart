@@ -66,30 +66,32 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
-                // 登录按钮的处理逻辑
-                if (_isAgree) {
-                  if (_unameController.text == '' ||
-                      _pwdController.text == '') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('请输入用户名和密码'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  } else {
-                    debugPrint(_unameController.text);
-                    debugPrint(_pwdController.text);
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomePage()));
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('请同意下方协议'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
-                }
+                // // 登录按钮的处理逻辑
+                // if (_isAgree) {
+                //   if (_unameController.text == '' ||
+                //       _pwdController.text == '') {
+                //     ScaffoldMessenger.of(context).showSnackBar(
+                //       const SnackBar(
+                //         content: Text('请输入用户名和密码'),
+                //         duration: Duration(seconds: 2),
+                //       ),
+                //     );
+                //   } else {
+                //     debugPrint(_unameController.text);
+                //     debugPrint(_pwdController.text);
+                //     Navigator.push(context,
+                //         MaterialPageRoute(builder: (context) => HomePage()));
+                //   }
+                // } else {
+                //   ScaffoldMessenger.of(context).showSnackBar(
+                //     const SnackBar(
+                //       content: Text('请同意下方协议'),
+                //       duration: Duration(seconds: 1),
+                //     ),
+                //   );
+                // }
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => HomePage()));
               },
               child: const Text('登录'),
             ),

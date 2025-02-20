@@ -1,7 +1,7 @@
 class Prize {
   String type; // 几等奖
   String name; // 奖品名称
-  String number; // 中奖人数
+  int number; // 中奖人数
   String picture; // 奖品图片链接url
   String description; // 奖品描述
 
@@ -9,7 +9,7 @@ class Prize {
   Prize({
     this.type = '',
     this.name = '',
-    this.number = '',
+    this.number = 0,
     this.picture = '',
     this.description = '',
   });
@@ -19,7 +19,7 @@ class Prize {
     return Prize(
       type: json['type'] ?? '',
       name: json['name'] ?? '',
-      number: json['number'] ?? '',
+      number: json['number'] ?? 0,
       picture: json['picture'] ?? '',
       description: json['description'] ?? '',
     );

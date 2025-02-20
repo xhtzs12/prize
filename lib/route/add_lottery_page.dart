@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottery/main.dart';
-import 'package:lottery/route/addLottery/common_lottery.dart';
+import 'package:lottery/route/addLottery/common_lottery_page.dart';
 import 'package:lottery/route/addLottery/instant_lottery_page.dart';
 
 class AddLotteryPage extends StatelessWidget {
@@ -54,7 +54,7 @@ class AddLotteryPage extends StatelessWidget {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => CommonLottery()));
+                                    builder: (context) => CommonLotteryPage()));
                           },
                           child: Container(
                             width: screenWidth * 0.6,
