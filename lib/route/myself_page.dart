@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottery/main.dart';
 import 'package:lottery/route/myself/information_page.dart';
-import 'package:lottery/route/myself/participated_lottery_page.dart';
+import 'package:lottery/route/display_lottery_page.dart';
 import 'package:lottery/route/myself/setting_page.dart';
 import 'package:provider/provider.dart';
 
@@ -58,7 +58,7 @@ class MyselfPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
                   debugPrint('抽奖记录');
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ParticipatedLotteryPage()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=> DisplayLotteryPage(lotteries: [],title: '已参加的抽奖')));
                 },
                 child: Card(
                   color: Theme.of(context).colorScheme.secondaryFixed,

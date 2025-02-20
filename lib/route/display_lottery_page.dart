@@ -1,19 +1,30 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:lottery/data/LotteryResponse.dart';
 import 'package:lottery/main.dart';
 
-class ParticipatedLotteryPage extends StatefulWidget {
-  const ParticipatedLotteryPage({super.key});
+class DisplayLotteryPage extends StatefulWidget {
+  final List<LotteryResponse> lotteries; // 抽奖信息列表
+  final String title; // 页面标题
+
+  // 构造函数，接收数据和标题
+  const DisplayLotteryPage(
+      {required this.lotteries, required this.title, super.key});
 
   @override
-  State<ParticipatedLotteryPage> createState() =>
-      _ParticipatedLotteryPageState();
+  State<DisplayLotteryPage> createState() => _DisplayLotteryPageState();
 }
 
-class _ParticipatedLotteryPageState extends State<ParticipatedLotteryPage> {
-  List<LotteryResponse> lotteryResponseList = [];
+class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
+  late List<LotteryResponse> lotteryResponseList;
+  late String title;
+
+  @override
+  void initState() {
+    super.initState();
+    // 初始化数据
+    lotteryResponseList = widget.lotteries;
+    title = widget.title;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +38,26 @@ class _ParticipatedLotteryPageState extends State<ParticipatedLotteryPage> {
             children: [
               UserListTileD(),
               Divider(color: Colors.grey, height: 1),
-              _buildIfNothing(),
+              SizedBox(height: 10),
+              Card(
+                elevation: 4,
+                color: Colors.grey[100],
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                child: Column(
+                  children: [
+                    _buildTitle(title),
+                    Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            _buildIfNothing(),
+                            _buildListView()
+                          ],
+                        )),
+                  ],
+                ),
+              ),
               _buildListView(),
             ],
           ),
@@ -82,6 +112,27 @@ class _ParticipatedLotteryPageState extends State<ParticipatedLotteryPage> {
     );
   }
 
+  Widget _buildTitle(String title) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryFixed,
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16), topRight: Radius.circular(16))),
+      padding: EdgeInsets.all(8.0),
+      child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildItem(String label, String value) {
     return Padding(
       padding: EdgeInsets.all(8),
@@ -100,14 +151,17 @@ class _ParticipatedLotteryPageState extends State<ParticipatedLotteryPage> {
     if (lotteryResponseList.isEmpty) {
       return Column(
         children: [
-          SizedBox(height: 10),
-          Center(
-            child: Text(
-              '什么都没有哦。',
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey),
+          
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: Text(
+                '什么都没有哦。',
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey),
+              ),
             ),
           ),
         ],

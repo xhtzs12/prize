@@ -136,9 +136,10 @@ class _InstantLotteryPageState extends State<InstantLotteryPage> {
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryFixed,
-                        borderRadius: BorderRadius.only(topLeft: Radius.circular(16),topRight: Radius.circular(16))
-                      ),
+                          color: Theme.of(context).colorScheme.primaryFixed,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16))),
                       padding: const EdgeInsets.all(8.0),
                       child: Center(
                         child: Text(
@@ -150,7 +151,6 @@ class _InstantLotteryPageState extends State<InstantLotteryPage> {
                         ),
                       ),
                     ),
-                    Divider(color: Colors.grey),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextField(

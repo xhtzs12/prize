@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottery/main.dart';
 import 'package:lottery/route/addLottery/common_lottery_page.dart';
 import 'package:lottery/route/addLottery/instant_lottery_page.dart';
+import 'package:lottery/route/display_lottery_page.dart';
 
 class AddLotteryPage extends StatelessWidget {
   const AddLotteryPage({super.key});
@@ -45,8 +46,9 @@ class AddLotteryPage extends StatelessWidget {
                             padding: const EdgeInsets.all(8.0),
                             child: Center(
                                 child: Text('创建抽奖',
-                                    style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold)))),
-                        Divider(color: Colors.grey),
+                                    style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold)))),
                         Spacer(),
                         InkWell(
                           onTap: () {
@@ -113,6 +115,7 @@ class AddLotteryPage extends StatelessWidget {
                           InkWell(
                             onTap: () {
                               debugPrint('已发布的抽奖');
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>DisplayLotteryPage(lotteries: [], title: '已发布抽奖')));
                             },
                             child: Container(
                               width: screenWidth * 0.6,
