@@ -120,7 +120,7 @@ class _InstantLotteryPageState extends State<InstantLotteryPage> {
                 child: Center(
                   heightFactor: 2,
                   child: Text(
-                    '即抽即开',
+                    '随机数生成',
                     style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   ),
                 ),

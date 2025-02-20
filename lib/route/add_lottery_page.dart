@@ -70,7 +70,7 @@ class AddLotteryPage extends StatelessWidget {
                         Spacer(),
                         InkWell(
                           onTap: () {
-                            debugPrint('即抽即开');
+                            debugPrint('随机数生成');
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -84,7 +84,7 @@ class AddLotteryPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10)),
                             child: Center(
                               child:
-                                  Text('即抽即开', style: TextStyle(fontSize: 28)),
+                                  Text('随机数生成', style: TextStyle(fontSize: 28)),
                             ),
                           ),
                         ),

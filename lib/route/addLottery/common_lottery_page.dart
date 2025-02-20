@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottery/data/Prize.dart';
 import 'package:lottery/main.dart';
+import 'package:lottery/route/home_page.dart';
 
 class CommonLotteryPage extends StatefulWidget {
   CommonLotteryPage({super.key});
@@ -14,8 +15,10 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   String? time;
+
   int? timestamp;
   int? joinMethod;
+  int? type;
   int joinLimit = 0;
   String? textNotice;
   String? imageNotice;
@@ -118,7 +121,9 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                 ),
               ),
               SizedBox(height: 10),
+
               //参与人员设置
+
               Card(
                 elevation: 4,
                 color: Colors.grey[100],
@@ -216,6 +221,55 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                   ],
                 ),
               ),
+              SizedBox(height: 10),
+
+              //抽奖类型设置
+
+              Card(
+                elevation: 4,
+                color: Colors.grey[100],
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                child: Column(
+                  children: [
+                    _buildTitle('抽奖类型'),
+                    RadioListTile<int>(
+                      title: Text('按时间开奖'),
+                      value: 1,
+                      groupValue: type,
+                      onChanged: (int? value) {
+                        setState(() {
+                          type = value;
+                        });
+                        debugPrint('type:$type');
+                      },
+                    ),
+                    RadioListTile<int>(
+                      title: Text('按人数开奖'),
+                      value: 2,
+                      groupValue: type,
+                      onChanged: (int? value) {
+                        setState(() {
+                          type = value;
+                        });
+                        debugPrint('type:$type');
+                      },
+                    ),
+                    RadioListTile<int>(
+                      title: Text('即抽即开'),
+                      value: 3,
+                      groupValue: type,
+                      onChanged: (int? value) {
+                        setState(() {
+                          type = value;
+                        });
+                        debugPrint('type:$type');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
               SizedBox(height: 10),
 
               //抽奖说明设置
@@ -317,6 +371,51 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
                   debugPrint('发起抽奖');
+                  if (type == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('抽奖类型不能为空'),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    return;
+                  }
+                  if (timestamp == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('开奖时间不能为空'),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    return;
+                  }
+                  if (joinLimit <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('参与人数错误'),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    return;
+                  }
+                  if (joinMethod == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('参加方式不能为空'),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    return;
+                  }
+                  if (prizeList.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('奖品不能为空'),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    return;
+                  }
                   showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -327,17 +426,19 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                           actions: [
                             TextButton(
                               onPressed: () {
-
-                                Navigator.pop(context);
-                                debugPrint('确定');
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HomePage()));
+                                debugPrint('确定发起抽奖');
                               },
                               child: Text('确定'),
                             ),
                             TextButton(
                               onPressed: () {
-                                
                                 Navigator.pop(context);
-                                debugPrint('取消');
+                                debugPrint('取消发起抽奖');
+                                Navigator.pop(context);
                               },
                               child: Text('取消'),
                             )
