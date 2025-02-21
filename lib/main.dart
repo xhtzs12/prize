@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:lottery/Util/SPUtil.dart';
 import 'package:lottery/data/User.dart';
 import 'package:lottery/route/home_page.dart';
 import 'package:lottery/route/login_page.dart';
+import 'package:lottery/util/HttpUtils.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -105,24 +108,53 @@ class UserProvider with ChangeNotifier {
 
   // 保存用户数据到 SharedPreferences
   Future<void> saveUser(User user) async {
+    debugPrint("保存用户信息");
     try {
       await SPUtils.setString('user', jsonEncode(user.toJson()));
       _user = user;
       notifyListeners();
-      debugPrint("保存用户信息");
+      debugPrint("保存用户信息成功");
     } catch (e) {
       debugPrint('Failed to save user: $e');
     }
   }
 
+  Future<void> getUserInfo() async {
+    debugPrint("同步用户信息");
+    HttpUtils httpUtils = HttpUtils();
+    int uid = _user.uid;
+    try {
+      Response response = await httpUtils.get(
+          'http://drawlots.billadom.top/getUserInformation',
+          params: {'uid': uid});
+      debugPrint(response.toString());
+      if (response.data != '') {
+        User u = User.fromJson(response.data);
+        debugPrint(u.toString());
+        saveUser(u);
+        debugPrint("同步用户信息成功");
+      }else{
+        debugPrint("同步用户信息失败");
+      }
+    } on DioException catch (e) {
+      String errorMessage =
+          '请求错误 ${e.response?.statusCode} ${e.response?.data['error'] ?? 'Unknown error'}';
+      debugPrint(errorMessage);
+    }
+  }
+
   // 从 SharedPreferences 加载用户数据
   Future<void> loadUser() async {
+    debugPrint("加载用户信息");
     final String? userJson = await SPUtils.getString('user');
     if (userJson != null) {
       final Map<String, dynamic> userMap = jsonDecode(userJson);
       _user = User.fromJson(userMap);
+      getUserInfo();
       notifyListeners();
-      debugPrint("加载用户信息");
+      debugPrint("加载用户信息成功");
+    }else{
+      debugPrint("加载用户信息失败");
     }
   }
 
