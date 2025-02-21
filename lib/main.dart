@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottery/Util/SPUtil.dart';
+import 'package:lottery/data/LotteryResponse.dart';
 import 'package:lottery/data/User.dart';
 import 'package:lottery/route/home_page.dart';
 import 'package:lottery/route/login_page.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => IndexProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()..loadTheme()),
         ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
+        ChangeNotifierProvider(create: (_) => LotteryResponseListProvider()),
         // 纯纯依托答辩，用了这俩Provider就跟废了样，更新不及时，这就是Future、async、和await啊。
         // 批斗时讲讲，哥。
         // FutureProvider<ThemeProvider>(
@@ -171,6 +173,23 @@ class UserProvider with ChangeNotifier {
     _user = User();
     notifyListeners();
     debugPrint("清除用户信息");
+  }
+}
+
+class LotteryResponseListProvider extends ChangeNotifier {
+  List<LotteryResponse> LotteryResponseList = [];
+  List<LotteryResponse> get selectedIndex => LotteryResponseList;
+
+  void update(List<LotteryResponse> l) {
+    LotteryResponseList = l;
+    debugPrint('更新抽奖数组');
+    debugPrint(LotteryResponseList.toString());
+    notifyListeners();
+  }
+
+  void clear() {
+    LotteryResponseList = [];
+    notifyListeners();
   }
 }
 

@@ -91,7 +91,6 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
       if (response.data['code'] == 200) {
         debugPrint('创建成功');
         int lotteryId = response.data['data'];
-        debugPrint(lotteryId.toString());
         int uid = l['uid'];
         _getlink(uid, lotteryId);
 

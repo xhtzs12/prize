@@ -1,8 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:lottery/data/LotteryResponse.dart';
 import 'package:lottery/main.dart';
 import 'package:lottery/route/addLottery/common_lottery_page.dart';
 import 'package:lottery/route/addLottery/instant_lottery_page.dart';
 import 'package:lottery/route/display_lottery_page.dart';
+import 'package:lottery/util/HttpUtils.dart';
+import 'package:provider/provider.dart';
 
 class AddLotteryPage extends StatelessWidget {
   const AddLotteryPage({super.key});
@@ -12,6 +16,37 @@ class AddLotteryPage extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final secondaryFixed = Theme.of(context).cardColor;
+
+    Future<void> getLotteryList(int uid, String url) async {
+      debugPrint("查询抽奖");
+      HttpUtils httpUtils = HttpUtils();
+      final params = {'uid': uid};
+      try {
+        Response response = await httpUtils
+            .get('http://drawlots.billadom.top/lots$url', params: params);
+        debugPrint('响应数据: ${response.data}');
+        if (response.data['code'] == 200) {
+          String lotteryList = response.data['data'];
+
+          List<LotteryResponse> lotteryResponseList =
+              httpUtils.parseLotteryResponse(lotteryList);
+
+          Provider.of<LotteryResponseListProvider>(context, listen: false)
+              .update(lotteryResponseList);
+          debugPrint("查询抽奖成功");
+        } else {
+          debugPrint("查询抽奖失败");
+        }
+      } on DioException catch (e) {
+        debugPrint('请求错误: ${e.message}');
+        if (e.response != null) {
+          debugPrint('状态码: ${e.response!.statusCode}');
+          debugPrint('响应数据: ${e.response!.data}');
+        } else {
+          debugPrint('请求未发送或未收到响应');
+        }
+      }
+    }
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -115,7 +150,17 @@ class AddLotteryPage extends StatelessWidget {
                           InkWell(
                             onTap: () {
                               debugPrint('已发布的抽奖');
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>DisplayLotteryPage(lotteries: [], title: '已发布抽奖')));
+                              int uid = Provider.of<UserProvider>(context,
+                                      listen: false)
+                                  .user!
+                                  .uid;
+                              Provider.of<LotteryResponseListProvider>(context,listen: false).clear();
+                              getLotteryList(uid, '/created');
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          DisplayLotteryPage(title: '已发布抽奖')));
                             },
                             child: Container(
                               width: screenWidth * 0.6,

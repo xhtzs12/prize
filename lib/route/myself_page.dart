@@ -1,8 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:lottery/data/LotteryResponse.dart';
 import 'package:lottery/main.dart';
 import 'package:lottery/route/myself/information_page.dart';
 import 'package:lottery/route/display_lottery_page.dart';
 import 'package:lottery/route/myself/setting_page.dart';
+import 'package:lottery/util/HttpUtils.dart';
 import 'package:provider/provider.dart';
 
 class MyselfPage extends StatelessWidget {
@@ -10,6 +13,38 @@ class MyselfPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future<void> getLotteryList(int uid, String url) async {
+      debugPrint("查询抽奖");
+      HttpUtils httpUtils = HttpUtils();
+      final params = {'uid': uid};
+      try {
+        Response response = await httpUtils
+            .get('http://drawlots.billadom.top/lots$url', params: params);
+        debugPrint('响应数据: ${response.data}');
+        if (response.data['code'] == 200) {
+          String lotteryList = response.data['data'];
+
+          List<LotteryResponse> lotteryResponseList =
+              httpUtils.parseLotteryResponse(lotteryList);
+
+          Provider.of<LotteryResponseListProvider>(context, listen: false)
+              .update(lotteryResponseList);
+          debugPrint("查询抽奖成功");
+        } else {
+          debugPrint("查询抽奖失败");
+        }
+      } on DioException catch (e) {
+        debugPrint('请求错误: ${e.message}');
+        if (e.response != null) {
+          debugPrint('状态码: ${e.response!.statusCode}');
+          debugPrint('响应数据: ${e.response!.data}');
+        } else {
+          debugPrint('请求未发送或未收到响应');
+        }
+      }
+    }
+
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -58,7 +93,18 @@ class MyselfPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
                   debugPrint('抽奖记录');
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=> DisplayLotteryPage(lotteries: [],title: '已参加的抽奖')));
+                  int uid = Provider.of<UserProvider>(context, listen: false)
+                      .user!
+                      .uid;
+                  Provider.of<LotteryResponseListProvider>(context,
+                          listen: false)
+                      .clear();
+                  getLotteryList(uid, '/joined');
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              DisplayLotteryPage(title: '已参加的抽奖')));
                 },
                 child: Card(
                   color: Theme.of(context).colorScheme.secondaryFixed,
