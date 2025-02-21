@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:lottery/data/Prize.dart';
 import 'package:lottery/main.dart';
+import 'package:provider/provider.dart';
 
 class DisplayPrizePage extends StatefulWidget {
-  final List<Prize> lotteries; // 抽奖信息列表
   final String title; // 页面标题
 
   // 构造函数，接收数据和标题
-  const DisplayPrizePage(
-      {required this.lotteries, required this.title, super.key});
+  const DisplayPrizePage({required this.title, super.key});
 
   @override
   State<DisplayPrizePage> createState() => _DisplayPrizePageState();
 }
 
 class _DisplayPrizePageState extends State<DisplayPrizePage> {
-  late List<Prize> prizeList;
   late String title;
 
   @override
   void initState() {
     super.initState();
     // 初始化数据
-    prizeList = widget.lotteries;
     title = widget.title;
   }
 
@@ -30,69 +27,162 @@ class _DisplayPrizePageState extends State<DisplayPrizePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GradientAppbar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              UserListTileD(),
-              Divider(color: Colors.grey, height: 1),
-              SizedBox(height: 10),
-              Card(
-                elevation: 4,
-                color: Colors.grey[100],
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Column(
-                  children: [
-                    _buildTitle(title),
-                    Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            _buildIfNothing(),
-                            _buildListView()
-                          ],
-                        )),
-                  ],
-                ),
+      body: Consumer<DataProvider>(
+        builder: (context, provider, child) {
+          dynamic data = provider.data;
+          String startTime = '';
+          String endTime = '';
+          String jionNumber = '';
+          String jionMethod = '';
+          String type = '';
+          // 检查 data 是否为空或不包含 'time' 键
+          if (data != null && data is Map && data.containsKey('time')) {
+            switch (data['join']['method']) {
+              case 1:
+                jionMethod = '仅限发起者分享参与';
+                break;
+              case 2:
+                jionMethod = '仅限群成员可参与';
+                break;
+              case 3:
+                jionMethod = '无限制';
+                break;
+              default:
+                break;
+            }
+
+            switch (data['type']) {
+              case 1:
+                type = '按时间开奖';
+                jionNumber = '无限制';
+                break;
+              case 2:
+                type = '按人数开奖';
+                jionNumber = data['join']['number'];
+                break;
+              case 3:
+                type = '即开即抽';
+                jionNumber = '无限制';
+                break;
+              default:
+                break;
+            }
+
+            startTime =
+                DateTime.fromMillisecondsSinceEpoch(data['time']['start'])
+                    .toLocal()
+                    .toString()
+                    .split('.')[0];
+            endTime = DateTime.fromMillisecondsSinceEpoch(data['time']['end'])
+                .toLocal()
+                .toString()
+                .split('.')[0];
+          } else {
+            debugPrint("data 为空或不包含 'time' 键");
+          }
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  UserListTileD(),
+                  Divider(color: Colors.grey, height: 1),
+                  SizedBox(height: 10),
+                  Card(
+                    elevation: 4,
+                    color: Colors.grey[100],
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Column(
+                      children: [
+                        _buildTitle('抽奖信息'),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              _buildItem('发布时间', startTime),
+                              _buildItem('截止时间', endTime),
+                              _buildItem('抽奖类型', type),
+                              _buildItem('参与方式', jionMethod),
+                              _buildItem('可参与人数', jionNumber),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Card(
+                    elevation: 4,
+                    color: Colors.grey[100],
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Column(
+                      children: [
+                        _buildTitle(title),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              _buildIfNothing(provider.dynamicList),
+                              _buildListView(provider.dynamicList)
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildListView() {
+  Widget _buildListView(List<dynamic> dynamicList) {
     return ListView.separated(
       shrinkWrap: true, // 允许 ListView 根据内容动态调整高度
       physics: NeverScrollableScrollPhysics(), // 禁止滚动
       separatorBuilder: (context, index) =>
           Divider(color: Colors.grey, height: 1),
-      itemCount: prizeList.length,
+      itemCount: dynamicList.length,
       itemBuilder: (context, index) {
-        Prize prize = prizeList[index];
-        return InkWell(
-          onTap: () {
-            debugPrint('抽奖$index详细信息');
-          },
-          child: Padding(
-            padding: EdgeInsets.all(8),
-            child: Column(
-              children: [
-                Center(
-                  child: (prize.picture.isEmpty)
-                      ? Icon(Icons.image, size: 50)
-                      : Image.network(
-                          prize.picture,
-                          fit: BoxFit.fill,
-                        ),
-                ),
-                _buildItem('奖品名称', prize.name),
-                _buildItem('奖品数量', prize.number.toString())
-              ],
+        dynamic item = dynamicList[index];
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: InkWell(
+            onTap: () {
+              debugPrint('奖品$index');
+            },
+            child: Padding(
+              padding: EdgeInsets.all(8),
+              child: Column(
+                children: [
+                  Center(
+                    child: FadeInImage(
+                      width: 160,
+                      height: 120,
+                      placeholder: AssetImage('assets/loading.gif'), // 加载中的占位图
+                      image: NetworkImage(item['picture']),
+                      fit: BoxFit.fill,
+                      imageErrorBuilder: (context, error, stackTrace) {
+                        // 图片加载失败时的占位图
+                        return Column(
+                          children: [
+                            Icon(Icons.image, size: 50),
+                            Text('图片加载错误', style: TextStyle(fontSize: 20)),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  _buildItem('奖品名称', item['name']),
+                  _buildItem('奖品数量', item['number'].toString())
+                ],
+              ),
             ),
           ),
         );
@@ -108,14 +198,11 @@ class _DisplayPrizePageState extends State<DisplayPrizePage> {
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16), topRight: Radius.circular(16))),
       padding: EdgeInsets.all(8.0),
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Text(
-          title,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -135,11 +222,10 @@ class _DisplayPrizePageState extends State<DisplayPrizePage> {
     );
   }
 
-  Widget _buildIfNothing() {
-    if (prizeList.isEmpty) {
+  Widget _buildIfNothing(List<dynamic> dynamicList) {
+    if (dynamicList.isEmpty) {
       return Column(
         children: [
-          
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
@@ -155,7 +241,7 @@ class _DisplayPrizePageState extends State<DisplayPrizePage> {
         ],
       );
     } else {
-      return SizedBox(height: 10);
+      return SizedBox();
     }
   }
 }

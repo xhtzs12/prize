@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()..loadTheme()),
         ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
         ChangeNotifierProvider(create: (_) => LotteryResponseListProvider()),
+        ChangeNotifierProvider(create: (_) => DataProvider()),
         // 纯纯依托答辩，用了这俩Provider就跟废了样，更新不及时，这就是Future、async、和await啊。
         // 批斗时讲讲，哥。
         // FutureProvider<ThemeProvider>(
@@ -132,13 +133,13 @@ class UserProvider with ChangeNotifier {
       debugPrint('响应数据: ${response.data}');
       if (response.data != '') {
         User u = User.fromJson(response.data);
-        if (u.face =='') {
+        if (u.face == '') {
           u.face = _user.face;
         }
         debugPrint(u.toString());
         saveUser(u);
         debugPrint("同步用户信息成功");
-      }else{
+      } else {
         debugPrint("同步用户信息失败");
       }
     } on DioException catch (e) {
@@ -162,7 +163,7 @@ class UserProvider with ChangeNotifier {
       getUserInfo();
       notifyListeners();
       debugPrint("加载用户信息成功");
-    }else{
+    } else {
       debugPrint("加载用户信息失败");
     }
   }
@@ -177,23 +178,42 @@ class UserProvider with ChangeNotifier {
 }
 
 class LotteryResponseListProvider extends ChangeNotifier {
-  List<LotteryResponse> LotteryResponseList = [];
-  List<LotteryResponse> get selectedIndex => LotteryResponseList;
+  List<LotteryResponse> lotteryResponseList = [];
+  List<LotteryResponse> get selectedIndex => lotteryResponseList;
 
   void update(List<LotteryResponse> l) {
-    LotteryResponseList = l;
+    lotteryResponseList = l;
     debugPrint('更新抽奖数组');
-    debugPrint(LotteryResponseList.toString());
+    debugPrint(lotteryResponseList.toString());
     notifyListeners();
   }
 
   void clear() {
-    LotteryResponseList = [];
+    lotteryResponseList = [];
     notifyListeners();
   }
 }
 
-Future<void> copyToClipboard(String text,BuildContext context) async {
+class DataProvider extends ChangeNotifier {
+  dynamic data;
+  List<dynamic> dynamicList = [];
+
+  void update(List<dynamic> l, data) {
+    this.data = data;
+    dynamicList = l;
+    debugPrint('更新数据');
+    notifyListeners();
+  }
+
+  void clear() {
+    dynamicList = [];
+    data = null;
+    debugPrint('清除数据');
+    notifyListeners();
+  }
+}
+
+Future<void> copyToClipboard(String text, BuildContext context) async {
   await Clipboard.setData(ClipboardData(text: text));
   // 可选：提示用户复制成功
   ScaffoldMessenger.of(context).showSnackBar(

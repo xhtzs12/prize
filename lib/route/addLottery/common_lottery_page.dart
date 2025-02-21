@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lottery/data/Prize.dart';
-import 'package:lottery/data/User.dart';
 import 'package:lottery/main.dart';
 import 'package:lottery/route/home_page.dart';
 import 'package:lottery/util/HttpUtils.dart';
@@ -953,8 +952,8 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
           prizeList[index].picture = url;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('上传成功')),
-      );
+          SnackBar(content: Text('上传成功')),
+        );
         return;
       } else {
         debugPrint("上传奖品图片失败: ${response.data['message']}");

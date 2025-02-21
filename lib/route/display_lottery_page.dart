@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:lottery/data/LotteryResponse.dart';
+import 'package:lottery/data/Prize.dart';
 import 'package:lottery/main.dart';
+import 'package:lottery/route/display_prize_page.dart';
 import 'package:lottery/util/HttpUtils.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +19,13 @@ class DisplayLotteryPage extends StatefulWidget {
 
 class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
   late String title;
+
+  @override
+  void initState() {
+    super.initState();
+    // 初始化数据
+    title = widget.title;
+  }
 
   Future<void> _getlink(int uid, int lotteryId) async {
     debugPrint("生成分享链接");
@@ -44,11 +53,38 @@ class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // 初始化数据
-    title = widget.title;
+  Future<void> getPrizeList(int id) async {
+    debugPrint("查询奖品");
+    HttpUtils httpUtils = HttpUtils();
+    final params = {'id': id};
+    try {
+      Response response = await httpUtils.get(
+          'http://drawlots.billadom.top/lots/detailedinfo',
+          params: params);
+      debugPrint('响应数据: ${response.data}');
+      if (response.data['code'] == 200) {
+        String data = response.data['data'];
+
+        Map<String, dynamic> responseMap = httpUtils.parsePrizeResponse(data);
+        debugPrint("查询奖品成功");
+        debugPrint(responseMap.toString());
+        List<dynamic> dynamicList = responseMap['prizes'];
+        dynamic info = responseMap['info'];
+        debugPrint(info.toString());
+        Provider.of<DataProvider>(context, listen: false)
+            .update(dynamicList, info);
+      } else {
+        debugPrint("查询奖品失败");
+      }
+    } on DioException catch (e) {
+      debugPrint('请求错误: ${e.message}');
+      if (e.response != null) {
+        debugPrint('状态码: ${e.response!.statusCode}');
+        debugPrint('响应数据: ${e.response!.data}');
+      } else {
+        debugPrint('请求未发送或未收到响应');
+      }
+    }
   }
 
   @override
@@ -75,13 +111,14 @@ class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
                       children: [
                         _buildTitle(title),
                         Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Column(
-                              children: [
-                                _buildIfNothing(provider.LotteryResponseList),
-                                _buildListView(provider.LotteryResponseList)
-                              ],
-                            )),
+                          padding: EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              _buildIfNothing(provider.lotteryResponseList),
+                              _buildListView(provider.lotteryResponseList)
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -119,6 +156,12 @@ class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
         return InkWell(
           onTap: () {
             debugPrint('抽奖$index详细信息');
+            Provider.of<DataProvider>(context, listen: false).clear();
+            getPrizeList(lotteryResponse.id);
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => DisplayPrizePage(title: '奖品详情')));
           },
           child: Padding(
             padding: EdgeInsets.all(8),
@@ -129,11 +172,13 @@ class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
                   child: Row(
                     children: [
                       Text(
-                        (index+1).toString(),
+                        (index + 1).toString(),
                         style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.secondaryFixedDim),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryFixedDim),
                       ),
                       Spacer(),
                       InkWell(
@@ -141,13 +186,18 @@ class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
                           debugPrint('分享抽奖${lotteryResponse.id}');
                           _getlink(uid, lotteryResponse.id);
                         },
-                        child: Icon(Icons.share,size: 35,),
+                        child: Icon(
+                          Icons.share,
+                          size: 35,
+                        ),
                       )
                     ],
                   ),
                 ),
                 Center(
                   child: FadeInImage(
+                    width: 160,
+                    height: 120,
                     placeholder: AssetImage('assets/loading.gif'), // 加载中的占位图
                     image: NetworkImage(lotteryResponse.picture),
                     fit: BoxFit.fill,

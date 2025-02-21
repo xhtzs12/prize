@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:lottery/data/LotteryResponse.dart';
+import 'package:lottery/data/Prize.dart';
 
 class HttpUtils {
   static final HttpUtils _instance = HttpUtils._internal();
@@ -45,6 +46,12 @@ class HttpUtils {
 
     // 将每个 JSON 对象转换为 LotteryResponse 对象
     return jsonList.map((json) => LotteryResponse.fromJson(json)).toList();
+  }
+
+  Map<String, dynamic> parsePrizeResponse(String jsonString) {
+    final Map<String, dynamic> dataMap = json.decode(jsonString);
+
+    return dataMap;
   }
 
   Future<Response> get(String path, {Map<String, dynamic>? params}) async {
