@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:lottery/Util/SPUtil.dart';
 import 'package:lottery/data/User.dart';
+import 'package:lottery/route/home_page.dart';
 import 'package:lottery/route/login_page.dart';
 import 'package:provider/provider.dart';
 
@@ -52,7 +53,9 @@ class MyApp extends StatelessWidget {
               ),
             ),
             debugShowCheckedModeBanner: false,
-            home: LoginPage(),
+            home: Provider.of<UserProvider>(context)._user.uid == 0
+                ? LoginPage()
+                : HomePage(),
           );
         },
       ),
