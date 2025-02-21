@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lottery/Util/SPUtil.dart';
 import 'package:lottery/data/User.dart';
 import 'package:lottery/route/home_page.dart';
@@ -171,6 +172,14 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
     debugPrint("清除用户信息");
   }
+}
+
+Future<void> copyToClipboard(String text,BuildContext context) async {
+  await Clipboard.setData(ClipboardData(text: text));
+  // 可选：提示用户复制成功
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('已复制到粘贴板')),
+  );
 }
 
 class GradientAppbar extends StatelessWidget implements PreferredSizeWidget {

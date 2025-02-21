@@ -45,51 +45,6 @@ class _InformationPageState extends State<InformationPage> {
     }
   }
 
-  // 上传图片
-  Future<void> _uploadImage(imageFile) async {
-    if (imageFile == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('请先选择图片')));
-      return;
-    }
-    try {
-      FormData formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(imageFile!.path,
-            filename: 'image.jpg'),
-      });
-
-      Response response = await Dio().post(
-        'http://pic.billadom.top/api/v1/upload',
-        data: formData,
-      );
-      debugPrint('响应数据: ${response.data}');
-      if (response.data['status']) {
-        debugPrint("上传用户头像成功");
-        User u = Provider.of<UserProvider>(context, listen: false).user!;
-        u.face = response.data['data']['links']['url'];
-        Provider.of<UserProvider>(context, listen: false).saveUser(u);
-        debugPrint(u.face);
-      } else {
-        debugPrint("上传用户头像失败: ${response.data['message']}");
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('上传成功')),
-      );
-    } on DioException catch (e) {
-      debugPrint('请求错误: ${e.message}');
-      if (e.response != null) {
-        debugPrint('状态码: ${e.response!.statusCode}');
-        debugPrint('响应数据: ${e.response!.data}');
-      } else {
-        debugPrint('请求未发送或未收到响应');
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('上传失败')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -213,6 +168,51 @@ class _InformationPageState extends State<InformationPage> {
         );
       },
     );
+  }
+
+  // 上传图片
+  Future<void> _uploadImage(imageFile) async {
+    if (imageFile == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('请先选择图片')));
+      return;
+    }
+    try {
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(imageFile!.path,
+            filename: 'image.jpg'),
+      });
+
+      Response response = await Dio().post(
+        'http://pic.billadom.top/api/v1/upload',
+        data: formData,
+      );
+      debugPrint('响应数据: ${response.data}');
+      if (response.data['status']) {
+        debugPrint("上传用户头像成功");
+        User u = Provider.of<UserProvider>(context, listen: false).user!;
+        u.face = response.data['data']['links']['url'];
+        Provider.of<UserProvider>(context, listen: false).saveUser(u);
+        debugPrint(u.face);
+      } else {
+        debugPrint("上传用户头像失败: ${response.data['message']}");
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('上传成功')),
+      );
+    } on DioException catch (e) {
+      debugPrint('请求错误: ${e.message}');
+      if (e.response != null) {
+        debugPrint('状态码: ${e.response!.statusCode}');
+        debugPrint('响应数据: ${e.response!.data}');
+      } else {
+        debugPrint('请求未发送或未收到响应');
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('上传失败')),
+      );
+    }
   }
 
   Future<void> _openCamera() async {

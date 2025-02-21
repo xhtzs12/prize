@@ -1,8 +1,13 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottery/data/Prize.dart';
 import 'package:lottery/main.dart';
 import 'package:lottery/route/home_page.dart';
+import 'package:lottery/util/HttpUtils.dart';
+import 'package:provider/provider.dart';
 
 class CommonLotteryPage extends StatefulWidget {
   CommonLotteryPage({super.key});
@@ -30,6 +35,8 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
   TextEditingController _prizeNameController = TextEditingController();
   TextEditingController _prizeNumberController = TextEditingController();
   TextEditingController _prizeDescriptionController = TextEditingController();
+  TextEditingController _textNoticeController = TextEditingController();
+  TextEditingController _imageNoticeController = TextEditingController();
 
   void showDateTimePicker() async {
     debugPrint('选择时间');
@@ -66,8 +73,77 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
           time = prizeTime.toLocal().toString().split('.')[0];
           debugPrint(time);
         });
-        timestamp = prizeTime.microsecondsSinceEpoch;
+        timestamp = prizeTime.millisecondsSinceEpoch;
         debugPrint("$timestamp");
+      }
+    }
+  }
+
+  Future<void> createLottery(Map<String, dynamic> l) async {
+    debugPrint('创建抽奖');
+    HttpUtils httpUtils = HttpUtils();
+    final formData = FormData.fromMap(l);
+
+    try {
+      Response response = await httpUtils
+          .post('http://drawlots.billadom.top/lots/create', data: formData);
+      debugPrint('响应数据: ${response.data}');
+      if (response.data['code'] == 200) {
+        debugPrint('创建成功');
+        int lotteryId = response.data['data'];
+        debugPrint(lotteryId.toString());
+        int uid = l['uid'];
+        _getlink(uid, lotteryId);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('创建成功'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      } else {
+        debugPrint('创建失败');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('创建失败'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    } on DioException catch (e) {
+      debugPrint('请求错误: ${e.message}');
+      if (e.response != null) {
+        debugPrint('状态码: ${e.response!.statusCode}');
+        debugPrint('响应数据: ${e.response!.data}');
+      } else {
+        debugPrint('请求未发送或未收到响应');
+      }
+    }
+  }
+
+  Future<void> _getlink(int uid, int lotteryId) async {
+    debugPrint("生成分享链接");
+    HttpUtils httpUtils = HttpUtils();
+    final params = {'id': lotteryId, 'uid': uid};
+    try {
+      Response response = await httpUtils.get(
+          'http://drawlots.billadom.top/lots/glink',
+          params: params);
+      debugPrint('响应数据: ${response.data}');
+      if (response.data != '') {
+        String lotteryLink = response.data['data'];
+        copyToClipboard(lotteryLink, context);
+        debugPrint("生成分享链接成功");
+      } else {
+        debugPrint("生成分享链接失败");
+      }
+    } on DioException catch (e) {
+      debugPrint('请求错误: ${e.message}');
+      if (e.response != null) {
+        debugPrint('状态码: ${e.response!.statusCode}');
+        debugPrint('响应数据: ${e.response!.data}');
+      } else {
+        debugPrint('请求未发送或未收到响应');
       }
     }
   }
@@ -299,21 +375,20 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                                   mainAxisSize: MainAxisSize.min, // 确保内容只占用必要空间
                                   children: [
                                     TextField(
-                                      controller: _joinLimitController,
+                                      controller: _textNoticeController,
                                     ),
                                   ],
                                 ),
                                 actions: [
                                   TextButton(
                                     onPressed: () {
-                                      if (_joinLimitController.text == '') {
+                                      if (_textNoticeController.text == '') {
                                         Navigator.pop(context);
                                         return;
                                       } else {
-                                        joinLimit = int.parse(
-                                            _joinLimitController.text);
+                                        textNotice = _textNoticeController.text;
                                         setState(() {});
-                                        debugPrint('确定修改参与人数$joinLimit');
+                                        debugPrint('确定抽奖说明$textNotice');
                                         Navigator.pop(context);
                                       }
                                     },
@@ -426,11 +501,33 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                           actions: [
                             TextButton(
                               onPressed: () {
+                                debugPrint('确定发起抽奖');
+                                int uid = Provider.of<UserProvider>(context,
+                                        listen: false)
+                                    .user!
+                                    .uid;
+                                List<Map<String, dynamic>> prizeMaps = prizeList
+                                    .map((prize) => prize.toJson())
+                                    .toList();
+                                String prizeStr = jsonEncode(prizeMaps);
+                                Map<String, dynamic> _createdLottery = {
+                                  'uid': uid,
+                                  'type': type,
+                                  'endTime': timestamp,
+                                  'joinLimit': joinLimit,
+                                  'joinMethod': joinMethod,
+                                  'textNotice':
+                                      (textNotice == null) ? '' : textNotice,
+                                  'imageNotice':
+                                      (imageNotice == null) ? '' : imageNotice,
+                                  'prize': prizeStr
+                                };
+                                debugPrint(_createdLottery.toString());
+                                createLottery(_createdLottery);
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => HomePage()));
-                                debugPrint('确定发起抽奖');
                               },
                               child: Text('确定'),
                             ),
