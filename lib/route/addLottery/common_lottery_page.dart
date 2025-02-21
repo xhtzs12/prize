@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lottery/data/Prize.dart';
+import 'package:lottery/data/User.dart';
 import 'package:lottery/main.dart';
 import 'package:lottery/route/home_page.dart';
 import 'package:lottery/util/HttpUtils.dart';
@@ -36,7 +39,6 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
   TextEditingController _prizeNumberController = TextEditingController();
   TextEditingController _prizeDescriptionController = TextEditingController();
   TextEditingController _textNoticeController = TextEditingController();
-  TextEditingController _imageNoticeController = TextEditingController();
 
   void showDateTimePicker() async {
     debugPrint('选择时间');
@@ -125,9 +127,8 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
     HttpUtils httpUtils = HttpUtils();
     final params = {'id': lotteryId, 'uid': uid};
     try {
-      Response response = await httpUtils.get(
-          'http://drawlots.billadom.top/lots/glink',
-          params: params);
+      Response response = await httpUtils
+          .get('http://drawlots.billadom.top/lots/glink', params: params);
       debugPrint('响应数据: ${response.data}');
       if (response.data != '') {
         String lotteryLink = response.data['data'];
@@ -347,7 +348,7 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
 
               SizedBox(height: 10),
 
-              //抽奖说明设置
+              //抽奖信息设置
 
               Card(
                 elevation: 4,
@@ -356,7 +357,7 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                     borderRadius: BorderRadius.circular(16)),
                 child: Column(
                   children: [
-                    _buildTitle('抽奖说明'),
+                    _buildTitle('抽奖信息'),
                     Padding(
                       padding: EdgeInsets.all(8.0),
                       child: InkWell(
@@ -406,6 +407,16 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                           );
                         },
                         child: _buildItem('抽奖说明', ''),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: InkWell(
+                        onTap: () {
+                          debugPrint('抽奖图片');
+                          showImagePickerSheet(context, -1);
+                        },
+                        child: _buildItem('抽奖图片', ''),
                       ),
                     ),
                   ],
@@ -509,7 +520,7 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                                     .map((prize) => prize.toJson())
                                     .toList();
                                 String prizeStr = jsonEncode(prizeMaps);
-                                Map<String, dynamic> _createdLottery = {
+                                Map<String, dynamic> createdLottery = {
                                   'uid': uid,
                                   'type': type,
                                   'endTime': timestamp,
@@ -521,8 +532,8 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                                       (imageNotice == null) ? '' : imageNotice,
                                   'prize': prizeStr
                                 };
-                                debugPrint(_createdLottery.toString());
-                                createLottery(_createdLottery);
+                                debugPrint(createdLottery.toString());
+                                createLottery(createdLottery);
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -798,12 +809,24 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
                 ),
                 SizedBox(height: 5),
                 Center(
-                  child: (indexPrize.picture.isEmpty)
-                      ? Icon(Icons.image, size: 50)
-                      : Image.network(
-                          indexPrize.picture,
-                          fit: BoxFit.fill,
+                  child: FadeInImage(
+                    placeholder: AssetImage('assets/loading.gif'), // 加载中的占位图
+                    image: NetworkImage(indexPrize.picture),
+                    fit: BoxFit.fill,
+                    imageErrorBuilder: (context, error, stackTrace) {
+                      // 图片加载失败时的占位图
+                      return InkWell(
+                        onTap: () {
+                          showImagePickerSheet(context, index);
+                        },
+                        child: Column(
+                          children: [
+                            Icon(Icons.image, size: 50),
+                          ],
                         ),
+                      );
+                    },
+                  ),
                 ),
                 _buildItem('奖品名称', indexPrize.name),
                 _buildItem('奖品数量', indexPrize.number.toString())
@@ -813,5 +836,175 @@ class _CommonLotteryPageState extends State<CommonLotteryPage> {
         );
       },
     );
+  }
+
+  void showImagePickerSheet(BuildContext context, int index) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  title: Text(
+                    '拍照',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _openCamera(index);
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  title: Text(
+                    '从相册选择',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _openGallery(index);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 上传抽奖图片
+  Future<void> _uploadLotteryImage(imageFile) async {
+    if (imageFile == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('请先选择图片')));
+      return;
+    }
+    try {
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(imageFile!.path,
+            filename: 'image.jpg'),
+      });
+
+      Response response = await Dio().post(
+        'http://pic.billadom.top/api/v1/upload',
+        data: formData,
+      );
+      debugPrint('响应数据: ${response.data}');
+      if (response.data['status']) {
+        debugPrint("上传抽奖图片成功");
+        String url = response.data['data']['links']['url'];
+        imageNotice = url;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('上传成功')),
+        );
+        return;
+      } else {
+        debugPrint("上传抽奖图片失败: ${response.data['message']}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('上传失败')),
+        );
+        return;
+      }
+    } on DioException catch (e) {
+      debugPrint('请求错误: ${e.message}');
+      if (e.response != null) {
+        debugPrint('状态码: ${e.response!.statusCode}');
+        debugPrint('响应数据: ${e.response!.data}');
+      } else {
+        debugPrint('请求未发送或未收到响应');
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('上传失败')),
+      );
+      return;
+    }
+  }
+
+  // 上传奖品图片
+  Future<void> _uploadPrizeImage(imageFile, int index) async {
+    if (imageFile == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('请先选择图片')));
+      return;
+    }
+    try {
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(imageFile!.path,
+            filename: 'image.jpg'),
+      });
+
+      Response response = await Dio().post(
+        'http://pic.billadom.top/api/v1/upload',
+        data: formData,
+      );
+      debugPrint('响应数据: ${response.data}');
+      if (response.data['status']) {
+        debugPrint("上传奖品图片成功");
+        String url = response.data['data']['links']['url'];
+
+        setState(() {
+          prizeList[index].picture = url;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('上传成功')),
+      );
+        return;
+      } else {
+        debugPrint("上传奖品图片失败: ${response.data['message']}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('上传失败')),
+        );
+        return;
+      }
+    } on DioException catch (e) {
+      debugPrint('请求错误: ${e.message}');
+      if (e.response != null) {
+        debugPrint('状态码: ${e.response!.statusCode}');
+        debugPrint('响应数据: ${e.response!.data}');
+      } else {
+        debugPrint('请求未发送或未收到响应');
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('上传失败')),
+      );
+      return;
+    }
+  }
+
+  Future<void> _openCamera(int index) async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      // 处理图片
+      debugPrint('上传图片');
+      final File file = File(image.path);
+      _uploadLotteryImage(file);
+    } else {
+      debugPrint('未选择图片');
+    }
+  }
+
+  Future<void> _openGallery(int index) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      // 处理图片
+      debugPrint('上传图片');
+      final File file = File(image.path);
+      if (index >= 0) {
+        _uploadPrizeImage(file, index);
+      } else {
+        _uploadLotteryImage(file);
+      }
+    } else {
+      debugPrint('未选择图片');
+    }
   }
 }

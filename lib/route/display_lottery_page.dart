@@ -124,24 +124,27 @@ class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
             padding: EdgeInsets.all(8),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Text(
-                      (index+1).toString(),
-                      style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.secondaryFixedDim),
-                    ),
-                    Spacer(),
-                    InkWell(
-                      onTap: () {
-                        debugPrint('分享抽奖${lotteryResponse.id}');
-                        _getlink(uid, lotteryResponse.id);
-                      },
-                      child: Icon(Icons.share,size: 35,),
-                    )
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        (index+1).toString(),
+                        style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.secondaryFixedDim),
+                      ),
+                      Spacer(),
+                      InkWell(
+                        onTap: () {
+                          debugPrint('分享抽奖${lotteryResponse.id}');
+                          _getlink(uid, lotteryResponse.id);
+                        },
+                        child: Icon(Icons.share,size: 35,),
+                      )
+                    ],
+                  ),
                 ),
                 Center(
                   child: FadeInImage(
