@@ -1,6 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:lottery/data/User.dart';
 import 'package:lottery/main.dart';
 import 'package:lottery/route/home_page.dart';
+import 'package:lottery/util/HttpUtils.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,9 +15,49 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  
   bool _isAgree = false;
   TextEditingController _unameController = TextEditingController();
   TextEditingController _pwdController = TextEditingController();
+
+  Future<void> loginSDU(Map<String, dynamic> userMap) async {
+    HttpUtils httpUtils = HttpUtils();
+    final formData = FormData.fromMap(userMap);
+
+    try {
+      Response response = await httpUtils
+          .post('http://drawlots.billadom.top/SDULogin', data: formData);
+      debugPrint(response.toString());
+      if (response.data == '') {
+        debugPrint('账号密码错误');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('请检查用户名和密码是否正确'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      } else {
+        User u = User.fromJson(response.data);
+        Provider.of<UserProvider>(context, listen: false).saveUser(u);
+        debugPrint(u.toString());
+        Provider.of<IndexProvider>(context, listen: false).updateSelectedIndex(0);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => HomePage()));
+      }
+    } on DioException catch (e) {
+      // debugPrint('Error: ${e.message}');
+      String errorMessage =
+          '请求错误 ${e.response?.statusCode} ${e.response?.data['error'] ?? 'Unknown error'}';
+      debugPrint(errorMessage);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,6 +98,10 @@ class _LoginPageState extends State<LoginPage> {
                 border: OutlineInputBorder(),
               ),
               controller: _unameController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+              ],
             ),
             const SizedBox(height: 16.0),
             TextField(
@@ -66,32 +115,36 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
-                // // 登录按钮的处理逻辑
-                // if (_isAgree) {
-                //   if (_unameController.text == '' ||
-                //       _pwdController.text == '') {
-                //     ScaffoldMessenger.of(context).showSnackBar(
-                //       const SnackBar(
-                //         content: Text('请输入用户名和密码'),
-                //         duration: Duration(seconds: 2),
-                //       ),
-                //     );
-                //   } else {
-                //     debugPrint(_unameController.text);
-                //     debugPrint(_pwdController.text);
-                //     Navigator.push(context,
-                //         MaterialPageRoute(builder: (context) => HomePage()));
-                //   }
-                // } else {
-                //   ScaffoldMessenger.of(context).showSnackBar(
-                //     const SnackBar(
-                //       content: Text('请同意下方协议'),
-                //       duration: Duration(seconds: 1),
-                //     ),
-                //   );
-                // }
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HomePage()));
+                // 登录按钮的处理逻辑
+                String sid = _unameController.text;
+                String password = _pwdController.text;
+                if (_isAgree) {
+                  if (sid.length != 12 || password == '') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('请检查用户名和密码是否正确'),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                  } else {
+                    debugPrint(sid);
+                    debugPrint(password);
+                    Map<String, String> userNP = {
+                      'sid': sid,
+                      'password': password
+                    };
+                    loginSDU(userNP);
+                    // Navigator.push(context,
+                    //     MaterialPageRoute(builder: (context) => HomePage()));
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('请同意下方协议'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                }
               },
               child: const Text('登录'),
             ),

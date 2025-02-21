@@ -66,6 +66,7 @@ class IndexProvider extends ChangeNotifier {
 
   void updateSelectedIndex(int index) {
     _selectedIndex = index;
+    debugPrint("BottombarIndex: $_selectedIndex");
     notifyListeners();
   }
 }

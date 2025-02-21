@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:lottery/data/LotteryResponse.dart';
+import 'package:lottery/data/Prize.dart';
 import 'package:lottery/main.dart';
 
-class DisplayLotteryPage extends StatefulWidget {
-  final List<LotteryResponse> lotteries; // 抽奖信息列表
+class DisplayPrizePage extends StatefulWidget {
+  final List<Prize> lotteries; // 抽奖信息列表
   final String title; // 页面标题
 
   // 构造函数，接收数据和标题
-  const DisplayLotteryPage(
+  const DisplayPrizePage(
       {required this.lotteries, required this.title, super.key});
 
   @override
-  State<DisplayLotteryPage> createState() => _DisplayLotteryPageState();
+  State<DisplayPrizePage> createState() => _DisplayPrizePageState();
 }
 
-class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
-  late List<LotteryResponse> lotteryResponseList;
+class _DisplayPrizePageState extends State<DisplayPrizePage> {
+  late List<Prize> prizeList;
   late String title;
 
   @override
   void initState() {
     super.initState();
     // 初始化数据
-    lotteryResponseList = widget.lotteries;
+    prizeList = widget.lotteries;
     title = widget.title;
   }
 
@@ -71,19 +71,9 @@ class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
       physics: NeverScrollableScrollPhysics(), // 禁止滚动
       separatorBuilder: (context, index) =>
           Divider(color: Colors.grey, height: 1),
-      itemCount: lotteryResponseList.length,
+      itemCount: prizeList.length,
       itemBuilder: (context, index) {
-        LotteryResponse lotteryResponse = lotteryResponseList[index];
-        String startTime =
-            DateTime.fromMillisecondsSinceEpoch(lotteryResponse.start)
-                .toLocal()
-                .toString()
-                .split('.')[0];
-        String endTime =
-            DateTime.fromMillisecondsSinceEpoch(lotteryResponse.end)
-                .toLocal()
-                .toString()
-                .split('.')[0];
+        Prize prize = prizeList[index];
         return InkWell(
           onTap: () {
             debugPrint('抽奖$index详细信息');
@@ -92,23 +82,16 @@ class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
             padding: EdgeInsets.all(8),
             child: Column(
               children: [
-                Row(children: [
-                  Spacer(),
-                  InkWell(onTap: (){
-                    debugPrint('分享抽奖${lotteryResponse.id}');
-                  },child: Icon(Icons.share),)
-                ],),
                 Center(
-                  child: (lotteryResponse.picture.isEmpty)
+                  child: (prize.picture.isEmpty)
                       ? Icon(Icons.image, size: 50)
                       : Image.network(
-                          lotteryResponse.picture,
+                          prize.picture,
                           fit: BoxFit.fill,
                         ),
                 ),
-                _buildItem('发布时间', startTime),
-                _buildItem('截止时间', endTime),
-                _buildItem('参加人数', lotteryResponse.number.toString())
+                _buildItem('奖品名称', prize.name),
+                _buildItem('奖品数量', prize.number.toString())
               ],
             ),
           ),
@@ -153,9 +136,10 @@ class _DisplayLotteryPageState extends State<DisplayLotteryPage> {
   }
 
   Widget _buildIfNothing() {
-    if (lotteryResponseList.isEmpty) {
+    if (prizeList.isEmpty) {
       return Column(
         children: [
+          
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
