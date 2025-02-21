@@ -9,8 +9,8 @@ class HttpUtils {
   HttpUtils._internal() {
     BaseOptions options = BaseOptions(
       baseUrl: '',
-      connectTimeout: Duration(seconds: 10),
-      receiveTimeout: Duration(seconds: 10),
+      connectTimeout: Duration(minutes: 1),
+      receiveTimeout: Duration(minutes: 1),
       headers: {
         'Content-Type': 'application/json',
       },

@@ -20,7 +20,6 @@ class HomePageState extends State<HomePage> {
   ];
 
   void _onItemTapped(int index) {
-    debugPrint('BottombarIndex: $index');
     Provider.of<IndexProvider>(context, listen: false).updateSelectedIndex(index);
   }
 

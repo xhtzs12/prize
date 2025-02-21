@@ -15,7 +15,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  
   bool _isAgree = false;
   TextEditingController _unameController = TextEditingController();
   TextEditingController _pwdController = TextEditingController();
@@ -27,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       Response response = await httpUtils
           .post('http://drawlots.billadom.top/SDULogin', data: formData);
-      debugPrint(response.toString());
+      debugPrint('响应数据: ${response.data}');
       if (response.data == '') {
         debugPrint('账号密码错误');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -40,12 +39,19 @@ class _LoginPageState extends State<LoginPage> {
         User u = User.fromJson(response.data);
         Provider.of<UserProvider>(context, listen: false).saveUser(u);
         debugPrint(u.toString());
-        Provider.of<IndexProvider>(context, listen: false).updateSelectedIndex(0);
+        Provider.of<IndexProvider>(context, listen: false)
+            .updateSelectedIndex(0);
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => HomePage()));
       }
     } on DioException catch (e) {
-      // debugPrint('Error: ${e.message}');
+      debugPrint('请求错误: ${e.message}');
+      if (e.response != null) {
+        debugPrint('状态码: ${e.response!.statusCode}');
+        debugPrint('响应数据: ${e.response!.data}');
+      } else {
+        debugPrint('请求未发送或未收到响应');
+      }
       String errorMessage =
           '请求错误 ${e.response?.statusCode} ${e.response?.data['error'] ?? 'Unknown error'}';
       debugPrint(errorMessage);

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -127,9 +126,12 @@ class UserProvider with ChangeNotifier {
       Response response = await httpUtils.get(
           'http://drawlots.billadom.top/getUserInformation',
           params: {'uid': uid});
-      debugPrint(response.toString());
+      debugPrint('响应数据: ${response.data}');
       if (response.data != '') {
         User u = User.fromJson(response.data);
+        if (u.face =='') {
+          u.face = _user.face;
+        }
         debugPrint(u.toString());
         saveUser(u);
         debugPrint("同步用户信息成功");
@@ -137,9 +139,13 @@ class UserProvider with ChangeNotifier {
         debugPrint("同步用户信息失败");
       }
     } on DioException catch (e) {
-      String errorMessage =
-          '请求错误 ${e.response?.statusCode} ${e.response?.data['error'] ?? 'Unknown error'}';
-      debugPrint(errorMessage);
+      debugPrint('请求错误: ${e.message}');
+      if (e.response != null) {
+        debugPrint('状态码: ${e.response!.statusCode}');
+        debugPrint('响应数据: ${e.response!.data}');
+      } else {
+        debugPrint('请求未发送或未收到响应');
+      }
     }
   }
 
