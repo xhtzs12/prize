@@ -1,25 +1,70 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:lottery/main.dart';
+import 'package:lottery/util/HttpUtils.dart';
 import 'package:provider/provider.dart';
 
-class DisplayPrizePage extends StatefulWidget {
-  final String title; // 页面标题
+class JoiningLotteryPage extends StatefulWidget {
+  final int lotteryId;
 
   // 构造函数，接收数据和标题
-  const DisplayPrizePage({required this.title, super.key});
+  const JoiningLotteryPage({required this.lotteryId, super.key});
 
   @override
-  State<DisplayPrizePage> createState() => _DisplayPrizePageState();
+  State<JoiningLotteryPage> createState() => _JoiningLotteryPageState();
 }
 
-class _DisplayPrizePageState extends State<DisplayPrizePage> {
-  late String title;
+class _JoiningLotteryPageState extends State<JoiningLotteryPage> {
+  late int lotteryId;
 
   @override
   void initState() {
     super.initState();
     // 初始化数据
-    title = widget.title;
+    lotteryId = widget.lotteryId;
+  }
+
+  Future<void> confrimJoinLottery(Map<String, dynamic> userMap) async {
+    HttpUtils httpUtils = HttpUtils();
+    final formData = FormData.fromMap(userMap);
+
+    try {
+      Response response = await httpUtils
+          .post('http://drawlots.billadom.top/lots/join', data: formData);
+      debugPrint('响应数据: ${response.data}');
+      if (response.data != '' && response.data['code'] == 200) {
+        debugPrint('确认参与成功');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('参与成功'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      } else {
+        debugPrint('确认参与失败');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('参与失败'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    } on DioException catch (e) {
+      debugPrint('请求错误: ${e.message}');
+      if (e.response != null) {
+        debugPrint('状态码: ${e.response!.statusCode}');
+        debugPrint('响应数据: ${e.response!.data}');
+      } else {
+        debugPrint('请求未发送或未收到响应');
+      }
+      debugPrint('确认参与失败');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('参与失败'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
   }
 
   @override
@@ -34,7 +79,7 @@ class _DisplayPrizePageState extends State<DisplayPrizePage> {
           String jionNumber = '';
           String jionMethod = '';
           String type = '';
-          // 检查 data 是否为空或不包含 'time' 键
+          // 检查 data 是否为空或不为map
           if (data != null && data is Map && data.containsKey('time')) {
             switch (data['join']['method']) {
               case 1:
@@ -66,7 +111,6 @@ class _DisplayPrizePageState extends State<DisplayPrizePage> {
               default:
                 break;
             }
-
             startTime =
                 DateTime.fromMillisecondsSinceEpoch(data['time']['start'])
                     .toLocal()
@@ -112,6 +156,7 @@ class _DisplayPrizePageState extends State<DisplayPrizePage> {
                       ],
                     ),
                   ),
+                  SizedBox(height: 20),
                   Card(
                     elevation: 4,
                     color: Colors.grey[100],
@@ -119,7 +164,7 @@ class _DisplayPrizePageState extends State<DisplayPrizePage> {
                         borderRadius: BorderRadius.circular(16)),
                     child: Column(
                       children: [
-                        _buildTitle(title),
+                        _buildTitle('奖品详情'),
                         Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Column(
@@ -138,6 +183,25 @@ class _DisplayPrizePageState extends State<DisplayPrizePage> {
           );
         },
       ),
+
+      // 添加一个浮动按钮
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // 按钮点击事件
+          debugPrint('确认参与');
+          int id = lotteryId;
+          int uid = Provider.of<UserProvider>(context, listen: false).user!.uid;
+          confrimJoinLottery({'id': id, 'uid': uid});
+        },
+        isExtended: true, // 设置为 true 使按钮更宽
+        backgroundColor:
+            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.6),
+        label: Text(
+          '确认参与',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 

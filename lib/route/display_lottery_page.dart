@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:lottery/data/LotteryResponse.dart';
-import 'package:lottery/data/Prize.dart';
 import 'package:lottery/main.dart';
 import 'package:lottery/route/display_prize_page.dart';
 import 'package:lottery/util/HttpUtils.dart';

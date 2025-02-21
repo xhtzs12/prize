@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:lottery/data/LotteryResponse.dart';
-import 'package:lottery/data/Prize.dart';
 
 class HttpUtils {
   static final HttpUtils _instance = HttpUtils._internal();
